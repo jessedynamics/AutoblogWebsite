@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Cars — Sormac Autoblog</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-s">S</span>ORMAC
+        <span class="logo-sub">AUTOBLOG</span>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="reviews.html">Reviews</a>
+        <a href="employee-cars.html" class="active">Employee Cars</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <h1>Employee Cars</h1>
+    <p>What we actually drive — rain, shine, or track day.</p>
+  </div>
+
+  <main class="page-main">
+
+    <!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  HOW TO ADD AN EMPLOYEE CAR                                      ║
+    ║                                                                  ║
+    ║  1. Copy one <article class="emp-card"> block below             ║
+    ║  2. Paste it anywhere in the list                                ║
+    ║  3. Update: employee name, role, car name, year, and the        ║
+    ║     "about this car" blurb + the fun facts list                  ║
+    ║  4. Optional image: put a .jpg in the images/ folder and set    ║
+    ║     background-image: url('images/your-file.jpg')                ║
+    ║  5. Change the accent color class:                               ║
+    ║     accent-red | accent-blue | accent-green |                    ║
+    ║     accent-yellow | accent-white                                 ║
+    ║  6. Save — done!                                                 ║
+    ╚══════════════════════════════════════════════════════════════════╝
+    -->
+<!-- Add Car Button -->
+    <div style="text-align: center; margin: 2rem 0;">
+      <button id="openFormBtn" style="padding: 10px 20px; font-size: 1.1rem; background: var(--accent-blue, #007bff); color: white; border: none; border-radius: 5px; cursor: pointer; font-family: var(--font-head);">+ Add Your Car</button>
+    </div>
+
+    <!-- The Modal Form -->
+    <div id="addCarModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+      <div style="background: #1e1e1e; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; color: white;">
+        <h2 style="margin-top: 0;">Add Employee Car</h2>
+        <form id="addCarForm" style="display: flex; flex-direction: column; gap: 1rem;">
+          
+          <input type="text" id="empName" placeholder="Your Name" required style="padding: 8px;" />
+          <input type="text" id="empRole" placeholder="Your Role (e.g., Kapitein)" required style="padding: 8px;" />
+          <input type="text" id="carName" placeholder="Car Year & Model" required style="padding: 8px;" />
+          <textarea id="carBlurb" placeholder="Tell us about the car..." rows="3" required style="padding: 8px;"></textarea>
+          
+          <input type="text" id="carFacts" placeholder="Facts (comma separated, e.g., 🔧 Stock, 🎨 Red)" required style="padding: 8px;" />
+          
+          <select id="accentColor" style="padding: 8px;">
+            <option value="accent-blue">Blue Accent</option>
+            <option value="accent-red">Red Accent</option>
+            <option value="accent-yellow">Yellow Accent</option>
+            <option value="accent-green">Green Accent</option>
+            <option value="accent-white">White Accent</option>
+          </select>
+
+          <label for="carImage">Upload Car Image:</label>
+          <input type="file" id="carImage" accept="image/*" required style="padding: 8px;" />
+
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button type="submit" style="padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; flex: 1;">Save Car</button>
+            <button type="button" id="closeFormBtn" style="padding: 10px; background: #dc3545; color: white; border: none; cursor: pointer; flex: 1;">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Container where new cars will be injected -->
+    <div id="dynamicCarsContainer"></div>
+
+    <article class="emp-card accent-blue">
+      <!-- <div class="emp-photo" style="background-image: url('images/Jesse.jpg'); background-color: #1c1c1c;"></div> -->
+      <div class="emp-car-img" style="background-image: url('images/sprint.jpeg'); background-color: #0d1a2a;"></div>
+      <div class="emp-body">
+        <div class="emp-person">
+          <div class="emp-avatar">J</div>
+          <div>
+            <div class="emp-name">Jesse Beuman</div>
+            <div class="emp-role">R&D Vision Engineer</div>
+          </div>
+        </div>
+        <h2 class="emp-carname">2007 Triumph Sprint ST 1050</h2>
+        <p class="emp-blurb">
+          Het blauwe monster!
+        </p>
+        <ul class="emp-facts">
+          <li>🔧 Verhoogde kuipruit</li>
+          <li>🛣️ ~43000 km </li>
+          <li>⛽ euro 98</li>
+          <li>🏁 Snelste manier om thuis te komen.</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ── EMPLOYEE 1 ── -->
+    <article class="emp-card accent-red">
+      <!-- <div class="emp-photo" style="background-image: url('images/Jesse.jpg'); background-color: #1c1c1c;"></div> -->
+      <div class="emp-car-img" style="background-image: url('images/focus.jpeg'); background-color: #0d1a2a;"></div>
+      <div class="emp-body">
+        <div class="emp-person">
+          <div class="emp-avatar">J</div>
+          <div>
+            <div class="emp-name">Jesse Beuman</div>
+            <div class="emp-role">R&D Vision Engineer</div>
+          </div>
+        </div>
+        <h2 class="emp-carname">2014 Ford Focus</h2>
+        <p class="emp-blurb">
+          De dikste bak op de parkeerplaats.
+        </p>
+        <ul class="emp-facts">
+          <li>🔧 100% stock</li>
+          <li>🛣️ ~191000 km </li>
+          <li>⛽ e5 of beter</li>
+          <li>🏁 Ooit 105 km/uur gereden</li>
+        </ul>
+      </div>
+    </article>
+
+
+
+    <!-- ── EMPLOYEE 2 ── -->
+    <article class="emp-card accent-yelloiw">
+      <div class="emp-car-img" style="background-image: url('images/tike.jpg'); background-color: #111827;"></div>
+      <div class="emp-body">
+        <div class="emp-person">
+          <div class="emp-avatar">N</div>
+          <div>
+            <div class="emp-name">Nick Trepels</div>
+            <div class="emp-role">Kapitein</div>
+          </div>
+        </div>
+        <h2 class="emp-carname">2024 Little Tikes</h2>
+        <p class="emp-blurb">
+          Alle gereedschap altijd bij de hand.
+        </p>
+        <ul class="emp-facts">
+          <li>🔧 Milltek exhaust, Stage 1 remap (490 hp)</li>
+          <li>🛣️ ~62,000 km</li>
+          <li>🎨 Geel</li>
+          <li>🏁 Binnen 2 minuten bij de parkeerplaats van het ziekenhuis. </li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ── EMPLOYEE 3 ── -->
+    <article class="emp-card accent-green">
+      <div class="emp-car-img" style="background-image: url('images/emp-tom-car.jpg'); background-color: #0a2a1a;"></div>
+      <div class="emp-body">
+        <div class="emp-person">
+          <div class="emp-avatar">T</div>
+          <div>
+            <div class="emp-name">Tom Bakker</div>
+            <div class="emp-role">Tech & EV Writer</div>
+          </div>
+        </div>
+        <h2 class="emp-carname">2024 Tesla Model 3 Highland</h2>
+        <p class="emp-blurb">
+          Yes, I drive what I review. The Highland genuinely converted me — I came in sceptical and left impressed. 
+          Charging at home overnight means I start every day with a full "tank". The only thing I miss is engine noise, 
+          which I've partially solved with a very questionable V8 sound system.
+        </p>
+        <ul class="emp-facts">
+          <li>🔌 Charged at home via 11kW wallbox</li>
+          <li>🛣️ ~18,000 km in 11 months</li>
+          <li>🎨 Pearl White</li>
+          <li>🔊 Has a ridiculous fake exhaust sound enabled</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ── EMPLOYEE 4 ── -->
+    <article class="emp-card accent-yellow">
+      <div class="emp-car-img" style="background-image: url('images/emp-kevin-car.jpg'); background-color: #1a1400;"></div>
+      <div class="emp-body">
+        <div class="emp-person">
+          <div class="emp-avatar">K</div>
+          <div>
+            <div class="emp-name">Kevin Peeters</div>
+            <div class="emp-role">Photographer</div>
+          </div>
+        </div>
+        <h2 class="emp-carname">1998 Mazda MX-5 NA</h2>
+        <p class="emp-blurb">
+          Not a daily — this is a weekend toy and I'm not apologising for it. 120 hp and absolutely zero driver aids means every 
+          roundabout is an event. I bought it for €4,500 and have spent about €3,000 keeping it perfect. Worth every cent.
+        </p>
+        <ul class="emp-facts">
+          <li>🔧 Fully restored, new suspension, Torsen LSD</li>
+          <li>🛣️ 178,000 km (original engine)</li>
+          <li>🎨 Classic Red — as God intended</li>
+          <li>🏁 Autocross regular on Sunday mornings</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ── EMPLOYEE 5 ── -->
+    <article class="emp-card accent-white">
+      <div class="emp-car-img" style="background-image: url('images/emp-sara-car.jpg'); background-color: #1a1a1a;"></div>
+      <div class="emp-body">
+        <div class="emp-person">
+          <div class="emp-avatar">S</div>
+          <div>
+            <div class="emp-name">Sara Willems</div>
+            <div class="emp-role">Video Producer</div>
+          </div>
+        </div>
+        <h2 class="emp-carname">2019 BMW 330i xDrive</h2>
+        <p class="emp-blurb">
+          I wanted an M3 but my wallet said otherwise, so I got the next best thing. The 330i is more than just a sensible 
+          alternative — it's a genuinely great car that still rewards a spirited drive. The xDrive makes it unstoppable in Dutch winters, 
+          and the interior still feels premium three years in.
+        </p>
+        <ul class="emp-facts">
+          <li>🔧 Stock, H&amp;R springs, 20" Styling 436</li>
+          <li>🛣️ ~51,000 km</li>
+          <li>🎨 Alpine White</li>
+          <li>☕ Has never been to a track, but looks fast at the coffee corner</li>
+        </ul>
+      </div>
+    </article>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">SORMAC AUTOBLOG</div>
+      <p>An internal passion project by car enthusiasts, for car enthusiasts.</p>
+    </div>
+  </footer>
+
+<script>
+    const modal = document.getElementById('addCarModal');
+    const openBtn = document.getElementById('openFormBtn');
+    const closeBtn = document.getElementById('closeFormBtn');
+    const form = document.getElementById('addCarForm');
+    const container = document.getElementById('dynamicCarsContainer');
+
+    // Open/Close Modal
+    openBtn.addEventListener('click', () => modal.style.display = 'flex');
+    closeBtn.addEventListener('click', () => modal.style.display = 'none');
+
+    // Load saved cars on page load
+    document.addEventListener('DOMContentLoaded', loadSavedCars);
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault(); // Stop the page from refreshing
+      console.log("Save button clicked! Processing...");
+
+      const imageInput = document.getElementById('carImage');
+      const file = imageInput.files[0];
+
+      // A helper function to build the HTML and save the data
+      const processAndSave = (imageString) => {
+        const newCar = {
+          name: document.getElementById('empName').value,
+          role: document.getElementById('empRole').value,
+          car: document.getElementById('carName').value,
+          blurb: document.getElementById('carBlurb').value,
+          facts: document.getElementById('carFacts').value.split(','),
+          color: document.getElementById('accentColor').value,
+          image: imageString 
+        };
+
+        try {
+          saveCar(newCar);
+          renderCar(newCar);
+          form.reset();
+          modal.style.display = 'none';
+          console.log("Car successfully added!");
+        } catch (error) {
+          console.error("Save failed:", error);
+          // Check if it's the 5MB browser limit
+          if (error.name === 'QuotaExceededError') {
+            alert("Error: That image file is too large! Browser memory is limited to ~5MB. Please compress the image or choose a smaller one.");
+          } else {
+            alert("An error occurred while saving. Check the developer console.");
+          }
+        }
+      };
+
+      // Read the file if one was selected
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          processAndSave(event.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert("Please select an image.");
+      }
+    });
+
+    function saveCar(carObj) {
+      let cars = JSON.parse(localStorage.getItem('sormacCars')) || [];
+      cars.push(carObj);
+      localStorage.setItem('sormacCars', JSON.stringify(cars));
+    }
+
+    function loadSavedCars() {
+      let cars = JSON.parse(localStorage.getItem('sormacCars')) || [];
+      cars.forEach(car => renderCar(car));
+    }
+
+    function renderCar(carObj) {
+      const factsHTML = carObj.facts.map(fact => `<li>${fact.trim()}</li>`).join('');
+      const avatarInitial = carObj.name.charAt(0).toUpperCase();
+
+      const article = document.createElement('article');
+      article.className = `emp-card ${carObj.color}`;
+      article.innerHTML = `
+        <div class="emp-car-img" style="background-image: url('${carObj.image}'); background-color: #0d1a2a; background-size: cover; background-position: center;"></div>
+        <div class="emp-body">
+          <div class="emp-person">
+            <div class="emp-avatar">${avatarInitial}</div>
+            <div>
+              <div class="emp-name">${carObj.name}</div>
+              <div class="emp-role">${carObj.role}</div>
+            </div>
+          </div>
+          <h2 class="emp-carname">${carObj.car}</h2>
+          <p class="emp-blurb">${carObj.blurb}</p>
+          <ul class="emp-facts">
+            ${factsHTML}
+          </ul>
+        </div>
+      `;
+      // Prepend to show newest first
+      container.prepend(article);
+    }
+  </script>
+
+
+</body>
+</html>
