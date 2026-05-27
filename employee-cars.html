@@ -6,6 +6,8 @@
   <title>Employee Cars — Sormac Autoblog</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
 </head>
 <body>
 
@@ -72,19 +74,28 @@
             <option value="accent-white">White Accent</option>
           </select>
 
-          <label for="carImage">Upload Car Image:</label>
-          <input type="file" id="carImage" accept="image/*" required style="padding: 8px;" />
+          <label for="carImage" style="font-size:0.85rem;color:var(--muted);">Upload Car Image (optional):</label>
+          <input type="file" id="carImage" accept="image/*" style="padding: 8px;" />
 
           <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-            <button type="submit" style="padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; flex: 1;">Save Car</button>
+            <button type="submit" id="submitCarBtn" style="padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; flex: 1;">Submit for Approval</button>
             <button type="button" id="closeFormBtn" style="padding: 10px; background: #dc3545; color: white; border: none; cursor: pointer; flex: 1;">Cancel</button>
           </div>
         </form>
       </div>
     </div>
     
-    <!-- Container where new cars will be injected -->
-    <div id="dynamicCarsContainer"></div>
+    <!-- Community submissions (loaded from Supabase) -->
+    <div id="community-section">
+      <div class="section-header" style="margin-bottom:1.5rem;">
+        <h2 style="font-family:var(--font-head);font-size:2rem;letter-spacing:0.06em;color:var(--white);">Community Cars</h2>
+      </div>
+      <div id="dynamicCarsContainer"></div>
+    </div>
+
+    <div class="section-header" style="margin-top:1rem;">
+      <h2 style="font-family:var(--font-head);font-size:2rem;letter-spacing:0.06em;color:var(--white);">Team Cars</h2>
+    </div>
 
     <article class="emp-card accent-blue">
       <!-- <div class="emp-photo" style="background-image: url('images/Jesse.jpg'); background-color: #1c1c1c;"></div> -->
@@ -248,104 +259,107 @@
   </footer>
 
 <script>
-    const modal = document.getElementById('addCarModal');
-    const openBtn = document.getElementById('openFormBtn');
-    const closeBtn = document.getElementById('closeFormBtn');
-    const form = document.getElementById('addCarForm');
+    const { createClient } = window.supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const modal     = document.getElementById('addCarModal');
+    const openBtn   = document.getElementById('openFormBtn');
+    const closeBtn  = document.getElementById('closeFormBtn');
+    const form      = document.getElementById('addCarForm');
     const container = document.getElementById('dynamicCarsContainer');
 
-    // Open/Close Modal
-    openBtn.addEventListener('click', () => modal.style.display = 'flex');
+    openBtn.addEventListener('click',  () => modal.style.display = 'flex');
     closeBtn.addEventListener('click', () => modal.style.display = 'none');
 
-    // Load saved cars on page load
-    document.addEventListener('DOMContentLoaded', loadSavedCars);
+    async function loadApprovedCars() {
+      const { data: cars, error } = await sb
+        .from('car_submissions')
+        .select('*')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
 
-    form.addEventListener('submit', function(e) {
-      e.preventDefault(); // Stop the page from refreshing
-      console.log("Save button clicked! Processing...");
+      if (error) { console.error(error); return; }
 
-      const imageInput = document.getElementById('carImage');
-      const file = imageInput.files[0];
-
-      // A helper function to build the HTML and save the data
-      const processAndSave = (imageString) => {
-        const newCar = {
-          name: document.getElementById('empName').value,
-          role: document.getElementById('empRole').value,
-          car: document.getElementById('carName').value,
-          blurb: document.getElementById('carBlurb').value,
-          facts: document.getElementById('carFacts').value.split(','),
-          color: document.getElementById('accentColor').value,
-          image: imageString 
-        };
-
-        try {
-          saveCar(newCar);
-          renderCar(newCar);
-          form.reset();
-          modal.style.display = 'none';
-          console.log("Car successfully added!");
-        } catch (error) {
-          console.error("Save failed:", error);
-          // Check if it's the 5MB browser limit
-          if (error.name === 'QuotaExceededError') {
-            alert("Error: That image file is too large! Browser memory is limited to ~5MB. Please compress the image or choose a smaller one.");
-          } else {
-            alert("An error occurred while saving. Check the developer console.");
-          }
-        }
-      };
-
-      // Read the file if one was selected
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          processAndSave(event.target.result);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert("Please select an image.");
+      if (!cars || cars.length === 0) {
+        container.innerHTML = '<p style="color:var(--muted);text-align:center;padding:2rem 0;">No community submissions yet — be the first!</p>';
+        return;
       }
-    });
-
-    function saveCar(carObj) {
-      let cars = JSON.parse(localStorage.getItem('sormacCars')) || [];
-      cars.push(carObj);
-      localStorage.setItem('sormacCars', JSON.stringify(cars));
-    }
-
-    function loadSavedCars() {
-      let cars = JSON.parse(localStorage.getItem('sormacCars')) || [];
       cars.forEach(car => renderCar(car));
     }
 
-    function renderCar(carObj) {
-      const factsHTML = carObj.facts.map(fact => `<li>${fact.trim()}</li>`).join('');
-      const avatarInitial = carObj.name.charAt(0).toUpperCase();
+    function renderCar(car) {
+      const factsHTML = (car.facts || []).map(f => `<li>${f}</li>`).join('');
+      const initial   = car.name.charAt(0).toUpperCase();
+      const imgStyle  = car.image_url
+        ? `background-image:url('${car.image_url}');background-size:cover;background-position:center;`
+        : '';
 
       const article = document.createElement('article');
-      article.className = `emp-card ${carObj.color}`;
+      article.className = `emp-card ${car.accent || 'accent-blue'}`;
       article.innerHTML = `
-        <div class="emp-car-img" style="background-image: url('${carObj.image}'); background-color: #0d1a2a; background-size: cover; background-position: center;"></div>
+        <div class="emp-car-img" style="background-color:#0d1a2a;${imgStyle}"></div>
         <div class="emp-body">
           <div class="emp-person">
-            <div class="emp-avatar">${avatarInitial}</div>
+            <div class="emp-avatar">${initial}</div>
             <div>
-              <div class="emp-name">${carObj.name}</div>
-              <div class="emp-role">${carObj.role}</div>
+              <div class="emp-name">${car.name}</div>
+              <div class="emp-role">${car.role}</div>
             </div>
           </div>
-          <h2 class="emp-carname">${carObj.car}</h2>
-          <p class="emp-blurb">${carObj.blurb}</p>
-          <ul class="emp-facts">
-            ${factsHTML}
-          </ul>
-        </div>
-      `;
-      // Prepend to show newest first
-      container.prepend(article);
+          <h2 class="emp-carname">${car.car_name}</h2>
+          <p class="emp-blurb">${car.blurb}</p>
+          <ul class="emp-facts">${factsHTML}</ul>
+        </div>`;
+      container.appendChild(article);
     }
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitCarBtn');
+      btn.textContent = 'Submitting…';
+      btn.disabled = true;
+
+      try {
+        let image_url = null;
+        const imageFile = document.getElementById('carImage').files[0];
+        if (imageFile) {
+          const ext  = imageFile.name.split('.').pop();
+          const path = `${Date.now()}.${ext}`;
+          const { data: upload, error: uploadErr } = await sb.storage
+            .from('car-images')
+            .upload(path, imageFile, { cacheControl: '3600' });
+          if (uploadErr) throw uploadErr;
+          const { data: urlData } = sb.storage.from('car-images').getPublicUrl(upload.path);
+          image_url = urlData.publicUrl;
+        }
+
+        const facts = document.getElementById('carFacts').value
+          .split(',').map(f => f.trim()).filter(Boolean);
+
+        const { error: insertErr } = await sb.from('car_submissions').insert([{
+          name:     document.getElementById('empName').value,
+          role:     document.getElementById('empRole').value,
+          car_name: document.getElementById('carName').value,
+          blurb:    document.getElementById('carBlurb').value,
+          facts,
+          accent:   document.getElementById('accentColor').value,
+          image_url
+        }]);
+        if (insertErr) throw insertErr;
+
+        modal.style.display = 'none';
+        form.reset();
+        alert('Your car has been submitted! It will appear on the page once approved.');
+      } catch (err) {
+        console.error(err);
+        alert('Something went wrong. Please try again.');
+      } finally {
+        btn.textContent = 'Submit for Approval';
+        btn.disabled = false;
+      }
+    });
+
+    loadApprovedCars();
   </script>
 
 

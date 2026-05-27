@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Sormac Autoblog</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    .admin-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      display: grid;
+      grid-template-columns: 200px 1fr auto;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    .admin-card-img {
+      height: 130px;
+      border-radius: var(--radius);
+      background-color: var(--bg3);
+      background-size: cover;
+      background-position: center;
+      border: 1px solid var(--border);
+    }
+    .admin-card-info { display: flex; flex-direction: column; gap: 0.4rem; }
+    .admin-card-name { font-weight: 600; color: var(--white); font-size: 1rem; }
+    .admin-card-car  { font-family: var(--font-head); font-size: 1.5rem; color: var(--white); letter-spacing: 0.04em; }
+    .admin-card-role { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .admin-card-blurb { font-size: 0.88rem; color: var(--muted); line-height: 1.6; margin-top: 0.25rem; }
+    .admin-card-facts { font-size: 0.82rem; color: var(--text); margin-top: 0.25rem; }
+    .admin-card-actions { display: flex; flex-direction: column; gap: 0.6rem; min-width: 110px; }
+    .btn-approve {
+      background: #22c55e; color: #000; border: none; border-radius: var(--radius);
+      padding: 0.6rem 1rem; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-approve:hover { background: #16a34a; color: #fff; }
+    .btn-decline {
+      background: transparent; color: var(--accent); border: 1px solid var(--accent);
+      border-radius: var(--radius); padding: 0.6rem 1rem; font-weight: 600; font-size: 0.8rem;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-decline:hover { background: var(--accent); color: #fff; }
+    .btn-undo {
+      background: transparent; color: var(--muted); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.5rem 1rem; font-size: 0.78rem; letter-spacing: 0.08em;
+      text-transform: uppercase; cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-undo:hover { border-color: var(--white); color: var(--white); }
+    .status-badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; padding: 0.15rem 0.55rem; border-radius: 3px; margin-bottom: 0.5rem;
+    }
+    .badge-pending  { color: var(--accent2); border: 1px solid var(--accent2); }
+    .badge-approved { color: #22c55e;        border: 1px solid #22c55e; }
+    .badge-declined { color: var(--muted);   border: 1px solid var(--border); }
+    .section-title {
+      font-family: var(--font-head); font-size: 2rem; color: var(--white);
+      letter-spacing: 0.06em; margin-bottom: 1.25rem; margin-top: 1rem;
+    }
+    .empty-msg { color: var(--muted); font-style: italic; padding: 1rem 0; }
+    .login-wrap {
+      max-width: 400px; margin: 4rem auto; padding: 0 2rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .login-wrap input {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); font-family: var(--font-body); font-size: 1rem;
+      padding: 0.75rem 1rem; width: 100%;
+    }
+    .login-wrap input:focus { outline: none; border-color: var(--accent); }
+    .btn-login {
+      background: var(--accent); color: #fff; border: none; border-radius: var(--radius);
+      padding: 0.85rem; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.14em;
+      text-transform: uppercase; cursor: pointer; width: 100%; transition: background 0.2s;
+    }
+    .btn-login:hover { background: #c42f23; }
+    .btn-logout {
+      background: transparent; color: var(--muted); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.5rem 1.25rem; font-size: 0.78rem;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-logout:hover { border-color: var(--white); color: var(--white); }
+    #loginError { color: var(--accent); font-size: 0.88rem; min-height: 1.2em; }
+    @media (max-width: 700px) {
+      .admin-card { grid-template-columns: 1fr; }
+      .admin-card-img { height: 180px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-s">S</span>ORMAC
+        <span class="logo-sub">AUTOBLOG</span>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="reviews.html">Reviews</a>
+        <a href="employee-cars.html">Employee Cars</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── Login screen ── -->
+  <div id="loginScreen">
+    <div class="page-hero">
+      <h1>Admin</h1>
+      <p>Log in to review car submissions.</p>
+    </div>
+    <div class="login-wrap">
+      <form id="loginForm" style="display:flex;flex-direction:column;gap:1rem;">
+        <input type="email"    id="adminEmail" placeholder="Email"    required autocomplete="email" />
+        <input type="password" id="adminPass"  placeholder="Password" required autocomplete="current-password" />
+        <button type="submit" class="btn-login" id="loginBtn">Log In</button>
+        <p id="loginError"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Dashboard (hidden until logged in) ── -->
+  <div id="dashboard" style="display:none;">
+    <div class="page-hero">
+      <h1>Submission Review</h1>
+      <p>Approve or decline visitor car submissions.</p>
+    </div>
+
+    <main class="page-main">
+
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:1rem;">
+        <span id="loggedInAs" style="font-size:0.82rem;color:var(--muted);"></span>
+        <button class="btn-logout" id="logoutBtn">Log out</button>
+      </div>
+
+      <div>
+        <p class="section-title">Pending <span id="pendingCount" style="color:var(--accent2);font-size:1.4rem;"></span></p>
+        <div id="pendingList" style="display:flex;flex-direction:column;gap:1.5rem;"></div>
+      </div>
+
+      <div>
+        <p class="section-title" style="color:var(--muted);">Approved & Declined</p>
+        <div id="resolvedList" style="display:flex;flex-direction:column;gap:1rem;"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">SORMAC AUTOBLOG</div>
+      <p>Admin panel — not linked publicly.</p>
+    </div>
+  </footer>
+
+<script>
+  const { createClient } = window.supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+
+  async function checkSession() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) showDashboard(session.user);
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    const err = document.getElementById('loginError');
+    btn.textContent = 'Logging in…';
+    btn.disabled = true;
+    err.textContent = '';
+
+    const { data, error } = await sb.auth.signInWithPassword({
+      email:    document.getElementById('adminEmail').value,
+      password: document.getElementById('adminPass').value,
+    });
+
+    if (error) {
+      err.textContent = 'Incorrect email or password.';
+      btn.textContent = 'Log In';
+      btn.disabled = false;
+    } else {
+      showDashboard(data.user);
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    document.getElementById('dashboard').style.display    = 'none';
+    document.getElementById('loginScreen').style.display  = '';
+  });
+
+  function showDashboard(user) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display   = '';
+    document.getElementById('loggedInAs').textContent    = user.email;
+    loadSubmissions();
+  }
+
+  // ── Submissions ───────────────────────────────────────────────────────────
+
+  async function loadSubmissions() {
+    document.getElementById('pendingList').innerHTML  = '<p style="color:var(--muted)">Loading…</p>';
+    document.getElementById('resolvedList').innerHTML = '';
+
+    const { data, error } = await sb
+      .from('car_submissions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      document.getElementById('pendingList').innerHTML = `<p style="color:var(--accent)">Error loading submissions: ${error.message}</p>`;
+      return;
+    }
+
+    const pending  = data.filter(s => s.status === 'pending');
+    const resolved = data.filter(s => s.status !== 'pending');
+
+    document.getElementById('pendingCount').textContent = pending.length ? `(${pending.length})` : '';
+    document.getElementById('pendingList').innerHTML  = '';
+    document.getElementById('resolvedList').innerHTML = '';
+
+    if (pending.length === 0) {
+      document.getElementById('pendingList').innerHTML = '<p class="empty-msg">No pending submissions.</p>';
+    } else {
+      pending.forEach(s => renderCard(s, document.getElementById('pendingList')));
+    }
+
+    if (resolved.length === 0) {
+      document.getElementById('resolvedList').innerHTML = '<p class="empty-msg">Nothing reviewed yet.</p>';
+    } else {
+      resolved.forEach(s => renderCard(s, document.getElementById('resolvedList')));
+    }
+  }
+
+  function renderCard(sub, container) {
+    const factsText = (sub.facts || []).join(' · ');
+    const imgStyle  = sub.image_url ? `background-image:url('${sub.image_url}');` : '';
+    const date      = new Date(sub.created_at).toLocaleDateString('nl-NL', { day:'numeric', month:'short', year:'numeric' });
+
+    const badgeClass = { pending: 'badge-pending', approved: 'badge-approved', declined: 'badge-declined' }[sub.status];
+
+    let actions = '';
+    if (sub.status === 'pending') {
+      actions = `
+        <button class="btn-approve" onclick="updateStatus('${sub.id}', 'approved')">Approve</button>
+        <button class="btn-decline" onclick="updateStatus('${sub.id}', 'declined')">Decline</button>`;
+    } else if (sub.status === 'approved') {
+      actions = `<button class="btn-undo" onclick="updateStatus('${sub.id}', 'declined')">Decline</button>`;
+    } else {
+      actions = `<button class="btn-undo" onclick="updateStatus('${sub.id}', 'approved')">Approve</button>`;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'admin-card';
+    div.id = `card-${sub.id}`;
+    div.innerHTML = `
+      <div class="admin-card-img" style="${imgStyle}"></div>
+      <div class="admin-card-info">
+        <span class="status-badge ${badgeClass}">${sub.status}</span>
+        <div class="admin-card-car">${sub.car_name}</div>
+        <div class="admin-card-name">${sub.name} <span class="admin-card-role">— ${sub.role}</span></div>
+        <div class="admin-card-blurb">${sub.blurb}</div>
+        ${factsText ? `<div class="admin-card-facts">${factsText}</div>` : ''}
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:0.5rem;">Submitted ${date}</div>
+      </div>
+      <div class="admin-card-actions">${actions}</div>`;
+    container.appendChild(div);
+  }
+
+  async function updateStatus(id, newStatus) {
+    const { error } = await sb
+      .from('car_submissions')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (error) { alert('Update failed: ' + error.message); return; }
+    loadSubmissions();
+  }
+
+  checkSession();
+</script>
+
+</body>
+</html>
