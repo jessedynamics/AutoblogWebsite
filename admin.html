@@ -52,6 +52,13 @@
       text-transform: uppercase; cursor: pointer; transition: border-color 0.2s, color 0.2s;
     }
     .btn-undo:hover { border-color: var(--white); color: var(--white); }
+    .btn-delete {
+      background: transparent; color: #555; border: 1px solid #333;
+      border-radius: var(--radius); padding: 0.5rem 1rem; font-size: 0.75rem; letter-spacing: 0.08em;
+      text-transform: uppercase; cursor: pointer; transition: border-color 0.2s, color 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-delete:hover { border-color: var(--accent); color: var(--accent); }
     .status-badge {
       display: inline-block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; padding: 0.15rem 0.55rem; border-radius: 3px; margin-bottom: 0.5rem;
@@ -252,11 +259,16 @@
     if (sub.status === 'pending') {
       actions = `
         <button class="btn-approve" onclick="updateStatus('${sub.id}', 'approved')">Approve</button>
-        <button class="btn-decline" onclick="updateStatus('${sub.id}', 'declined')">Decline</button>`;
+        <button class="btn-decline" onclick="updateStatus('${sub.id}', 'declined')">Decline</button>
+        <button class="btn-delete"  onclick="deleteSubmission('${sub.id}', '${sub.image_url || ''}')">Delete</button>`;
     } else if (sub.status === 'approved') {
-      actions = `<button class="btn-undo" onclick="updateStatus('${sub.id}', 'declined')">Decline</button>`;
+      actions = `
+        <button class="btn-undo"   onclick="updateStatus('${sub.id}', 'declined')">Decline</button>
+        <button class="btn-delete" onclick="deleteSubmission('${sub.id}', '${sub.image_url || ''}')">Delete</button>`;
     } else {
-      actions = `<button class="btn-undo" onclick="updateStatus('${sub.id}', 'approved')">Approve</button>`;
+      actions = `
+        <button class="btn-undo"   onclick="updateStatus('${sub.id}', 'approved')">Approve</button>
+        <button class="btn-delete" onclick="deleteSubmission('${sub.id}', '${sub.image_url || ''}')">Delete</button>`;
     }
 
     const div = document.createElement('div');
@@ -283,6 +295,19 @@
       .eq('id', id);
 
     if (error) { alert('Update failed: ' + error.message); return; }
+    loadSubmissions();
+  }
+
+  async function deleteSubmission(id, imageUrl) {
+    if (!confirm('Permanently delete this submission?')) return;
+
+    if (imageUrl) {
+      const path = imageUrl.split('/car-images/')[1];
+      if (path) await sb.storage.from('car-images').remove([path]);
+    }
+
+    const { error } = await sb.from('car_submissions').delete().eq('id', id);
+    if (error) { alert('Delete failed: ' + error.message); return; }
     loadSubmissions();
   }
 
