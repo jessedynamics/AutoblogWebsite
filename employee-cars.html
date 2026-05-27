@@ -30,6 +30,63 @@
     <p>What we actually drive — rain, shine, or track day.</p>
   </div>
 
+  <!-- Auth bar -->
+  <div style="background:var(--bg2);border-bottom:1px solid var(--border);padding:0.6rem 2rem;display:flex;justify-content:flex-end;align-items:center;gap:1rem;">
+    <div id="authBar"></div>
+  </div>
+
+  <!-- Auth modal (login / register) -->
+  <div id="authModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:90%;max-width:420px;color:var(--text);">
+      <div style="display:flex;gap:2rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:1rem;">
+        <button id="tabLogin"    onclick="switchTab('login')"    style="background:none;border:none;font-family:var(--font-head);font-size:1.4rem;letter-spacing:0.05em;cursor:pointer;color:var(--white);">Log in</button>
+        <button id="tabRegister" onclick="switchTab('register')" style="background:none;border:none;font-family:var(--font-head);font-size:1.4rem;letter-spacing:0.05em;cursor:pointer;color:var(--muted);">Register</button>
+        <button onclick="document.getElementById('authModal').style.display='none'" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;">&times;</button>
+      </div>
+      <p id="authError" style="color:var(--accent);font-size:0.85rem;min-height:1.2em;margin-bottom:0.5rem;"></p>
+      <!-- Login tab -->
+      <form id="loginForm" style="display:flex;flex-direction:column;gap:0.9rem;">
+        <input type="email"    id="loginEmail" placeholder="Email"    required style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;padding:0.7rem 1rem;"/>
+        <input type="password" id="loginPass"  placeholder="Password" required style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;padding:0.7rem 1rem;"/>
+        <button type="submit" style="background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:0.8rem;font-weight:600;font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;font-family:var(--font-body);">Log in</button>
+      </form>
+      <!-- Register tab -->
+      <form id="registerForm" style="display:none;flex-direction:column;gap:0.9rem;">
+        <input type="email"    id="regEmail"   placeholder="Email"            required style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;padding:0.7rem 1rem;"/>
+        <input type="password" id="regPass"    placeholder="Password"         required style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;padding:0.7rem 1rem;"/>
+        <input type="password" id="regConfirm" placeholder="Confirm password" required style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;padding:0.7rem 1rem;"/>
+        <button type="submit" style="background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:0.8rem;font-weight:600;font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;font-family:var(--font-body);">Create account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit modal -->
+  <div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:90%;max-width:500px;color:var(--text);max-height:90vh;overflow-y:auto;">
+      <h2 style="font-family:var(--font-head);font-size:1.8rem;letter-spacing:0.05em;margin-bottom:1.25rem;">Edit Your Car</h2>
+      <form id="editForm" style="display:flex;flex-direction:column;gap:0.9rem;">
+        <input type="text"     id="editName"    placeholder="Your Name"               required style="padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;"/>
+        <input type="text"     id="editRole"    placeholder="Your Role"               required style="padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;"/>
+        <input type="text"     id="editCarName" placeholder="Car Year &amp; Model"    required style="padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;"/>
+        <textarea              id="editBlurb"   placeholder="Tell us about the car…"  required rows="3" style="padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;"></textarea>
+        <input type="text"     id="editFacts"   placeholder="Facts (comma separated)" required style="padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;"/>
+        <select id="editAccent" style="padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:1rem;">
+          <option value="accent-blue">Blue Accent</option>
+          <option value="accent-red">Red Accent</option>
+          <option value="accent-yellow">Yellow Accent</option>
+          <option value="accent-green">Green Accent</option>
+          <option value="accent-white">White Accent</option>
+        </select>
+        <label style="font-size:0.85rem;color:var(--muted);">Replace image (optional):</label>
+        <input type="file" id="editImage" accept="image/*" style="padding:8px;color:var(--text);"/>
+        <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+          <button type="submit" id="saveEditBtn" style="padding:10px;background:#22c55e;color:#000;border:none;border-radius:var(--radius);cursor:pointer;flex:1;font-weight:600;font-family:var(--font-body);">Save Changes</button>
+          <button type="button" id="closeEditBtn" style="padding:10px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;flex:1;font-family:var(--font-body);">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <main class="page-main">
 
     <!--
@@ -50,7 +107,7 @@
     -->
 <!-- Add Car Button -->
     <div style="text-align: center; margin: 2rem 0;">
-      <button id="openFormBtn" style="padding: 10px 20px; font-size: 1.1rem; background: var(--accent-blue, #007bff); color: white; border: none; border-radius: 5px; cursor: pointer; font-family: var(--font-head);">+ Add Your Car</button>
+      <button id="openFormBtn" style="display:none;padding: 10px 20px; font-size: 1.1rem; background: var(--accent); color: white; border: none; border-radius: var(--radius); cursor: pointer; font-family: var(--font-head);">+ Add Your Car</button>
     </div>
 
     <!-- The Modal Form -->
@@ -268,10 +325,88 @@
     const form      = document.getElementById('addCarForm');
     const container = document.getElementById('dynamicCarsContainer');
 
-    openBtn.addEventListener('click',  () => modal.style.display = 'flex');
-    closeBtn.addEventListener('click', () => modal.style.display = 'none');
+    let currentUser = null;
+    const carsCache = {};
+
+    // ── Auth state ────────────────────────────────────────────────────────────
+
+    sb.auth.onAuthStateChange((event, session) => {
+      currentUser = session?.user ?? null;
+      updateAuthBar();
+      loadApprovedCars();
+    });
+
+    function updateAuthBar() {
+      const bar = document.getElementById('authBar');
+      if (currentUser) {
+        bar.innerHTML = `
+          <span style="font-size:0.82rem;color:var(--muted);">${currentUser.email}</span>
+          <button onclick="signOut()" style="font-size:0.78rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:var(--radius);padding:0.3rem 0.75rem;cursor:pointer;font-family:var(--font-body);">Log out</button>`;
+        openBtn.style.display = 'inline-block';
+      } else {
+        bar.innerHTML = `
+          <span style="font-size:0.82rem;color:var(--muted);">Have a car to share?</span>
+          <button onclick="document.getElementById('authModal').style.display='flex'" style="font-size:0.78rem;color:var(--white);background:var(--accent);border:none;border-radius:var(--radius);padding:0.35rem 1rem;cursor:pointer;font-family:var(--font-body);font-weight:600;">Log in / Register</button>`;
+        openBtn.style.display = 'none';
+      }
+    }
+
+    async function signOut() {
+      await sb.auth.signOut();
+    }
+
+    // ── Auth modal tabs ───────────────────────────────────────────────────────
+
+    function switchTab(tab) {
+      document.getElementById('loginForm').style.display    = tab === 'login'    ? 'flex' : 'none';
+      document.getElementById('registerForm').style.display = tab === 'register' ? 'flex' : 'none';
+      document.getElementById('tabLogin').style.color    = tab === 'login'    ? 'var(--white)' : 'var(--muted)';
+      document.getElementById('tabRegister').style.color = tab === 'register' ? 'var(--white)' : 'var(--muted)';
+      document.getElementById('authError').textContent = '';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      btn.textContent = 'Logging in…'; btn.disabled = true;
+      const { error } = await sb.auth.signInWithPassword({
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPass').value,
+      });
+      if (error) {
+        document.getElementById('authError').textContent = 'Incorrect email or password.';
+        btn.textContent = 'Log in'; btn.disabled = false;
+      } else {
+        document.getElementById('authModal').style.display = 'none';
+        this.reset();
+      }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('authError');
+      const pass = document.getElementById('regPass').value;
+      if (pass !== document.getElementById('regConfirm').value) {
+        errEl.textContent = 'Passwords do not match.'; return;
+      }
+      const btn = this.querySelector('button[type="submit"]');
+      btn.textContent = 'Creating account…'; btn.disabled = true;
+      const { error } = await sb.auth.signUp({
+        email: document.getElementById('regEmail').value, password: pass,
+      });
+      if (error) {
+        errEl.textContent = error.message;
+      } else {
+        errEl.style.color = '#22c55e';
+        errEl.textContent = 'Account created! Check your email to confirm, then log in.';
+      }
+      btn.textContent = 'Create account'; btn.disabled = false;
+    });
+
+    // ── Load & render approved cars ───────────────────────────────────────────
 
     async function loadApprovedCars() {
+      container.innerHTML = '';
       const { data: cars, error } = await sb
         .from('car_submissions')
         .select('*')
@@ -279,32 +414,36 @@
         .order('created_at', { ascending: false });
 
       if (error) { console.error(error); return; }
-
       if (!cars || cars.length === 0) {
         container.innerHTML = '<p style="color:var(--muted);text-align:center;padding:2rem 0;">No community submissions yet — be the first!</p>';
         return;
       }
-      cars.forEach(car => renderCar(car));
+      cars.forEach(car => { carsCache[car.id] = car; renderCar(car); });
     }
 
     function renderCar(car) {
       const factsHTML = (car.facts || []).map(f => `<li>${f}</li>`).join('');
       const initial   = car.name.charAt(0).toUpperCase();
       const imgStyle  = car.image_url
-        ? `background-image:url('${car.image_url}');background-size:cover;background-position:center;`
-        : '';
+        ? `background-image:url('${car.image_url}');background-size:cover;background-position:center;` : '';
+      const isOwner   = currentUser && currentUser.id === car.user_id;
+
+      const ownerButtons = isOwner ? `
+        <div style="margin-left:auto;display:flex;gap:0.5rem;align-items:center;">
+          <button onclick="openEdit('${car.id}')" style="font-size:0.72rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:var(--radius);padding:0.25rem 0.65rem;cursor:pointer;font-family:var(--font-body);">Edit</button>
+          <button onclick="ownerDelete('${car.id}')" style="font-size:0.72rem;color:var(--accent);background:none;border:1px solid var(--accent);border-radius:var(--radius);padding:0.25rem 0.65rem;cursor:pointer;font-family:var(--font-body);">Delete</button>
+        </div>` : '';
 
       const article = document.createElement('article');
       article.className = `emp-card ${car.accent || 'accent-blue'}`;
+      article.id = `car-${car.id}`;
       article.innerHTML = `
         <div class="emp-car-img" style="background-color:#0d1a2a;${imgStyle}"></div>
         <div class="emp-body">
           <div class="emp-person">
             <div class="emp-avatar">${initial}</div>
-            <div>
-              <div class="emp-name">${car.name}</div>
-              <div class="emp-role">${car.role}</div>
-            </div>
+            <div><div class="emp-name">${car.name}</div><div class="emp-role">${car.role}</div></div>
+            ${ownerButtons}
           </div>
           <h2 class="emp-carname">${car.car_name}</h2>
           <p class="emp-blurb">${car.blurb}</p>
@@ -313,53 +452,106 @@
       container.appendChild(article);
     }
 
+    // ── Submit new car ────────────────────────────────────────────────────────
+
+    openBtn.addEventListener('click',  () => modal.style.display = 'flex');
+    closeBtn.addEventListener('click', () => modal.style.display = 'none');
+
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
       const btn = document.getElementById('submitCarBtn');
-      btn.textContent = 'Submitting…';
-      btn.disabled = true;
-
+      btn.textContent = 'Submitting…'; btn.disabled = true;
       try {
-        let image_url = null;
-        const imageFile = document.getElementById('carImage').files[0];
-        if (imageFile) {
-          const ext  = imageFile.name.split('.').pop();
-          const path = `${Date.now()}.${ext}`;
-          const { data: upload, error: uploadErr } = await sb.storage
-            .from('car-images')
-            .upload(path, imageFile, { cacheControl: '3600' });
-          if (uploadErr) throw uploadErr;
-          const { data: urlData } = sb.storage.from('car-images').getPublicUrl(upload.path);
-          image_url = urlData.publicUrl;
-        }
-
-        const facts = document.getElementById('carFacts').value
-          .split(',').map(f => f.trim()).filter(Boolean);
-
-        const { error: insertErr } = await sb.from('car_submissions').insert([{
-          name:     document.getElementById('empName').value,
-          role:     document.getElementById('empRole').value,
+        const image_url = await uploadImage(document.getElementById('carImage').files[0]);
+        const facts = document.getElementById('carFacts').value.split(',').map(f => f.trim()).filter(Boolean);
+        const { error } = await sb.from('car_submissions').insert([{
+          name: document.getElementById('empName').value,
+          role: document.getElementById('empRole').value,
           car_name: document.getElementById('carName').value,
-          blurb:    document.getElementById('carBlurb').value,
-          facts,
-          accent:   document.getElementById('accentColor').value,
-          image_url
+          blurb: document.getElementById('carBlurb').value,
+          facts, accent: document.getElementById('accentColor').value, image_url
         }]);
-        if (insertErr) throw insertErr;
-
+        if (error) throw error;
         modal.style.display = 'none';
         form.reset();
-        alert('Your car has been submitted! It will appear on the page once approved.');
+        alert('Your car has been submitted! It will appear once approved.');
       } catch (err) {
-        console.error(err);
-        alert('Something went wrong. Please try again.');
+        console.error(err); alert('Something went wrong. Please try again.');
       } finally {
-        btn.textContent = 'Submit for Approval';
-        btn.disabled = false;
+        btn.textContent = 'Submit for Approval'; btn.disabled = false;
       }
     });
 
-    loadApprovedCars();
+    // ── Edit own car ──────────────────────────────────────────────────────────
+
+    let editingId = null;
+
+    function openEdit(id) {
+      const car = carsCache[id];
+      editingId  = id;
+      document.getElementById('editName').value    = car.name;
+      document.getElementById('editRole').value    = car.role;
+      document.getElementById('editCarName').value = car.car_name;
+      document.getElementById('editBlurb').value   = car.blurb;
+      document.getElementById('editFacts').value   = (car.facts || []).join(', ');
+      document.getElementById('editAccent').value  = car.accent || 'accent-blue';
+      document.getElementById('editModal').style.display = 'flex';
+    }
+
+    document.getElementById('closeEditBtn').addEventListener('click', () => {
+      document.getElementById('editModal').style.display = 'none';
+    });
+
+    document.getElementById('editForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveEditBtn');
+      btn.textContent = 'Saving…'; btn.disabled = true;
+      try {
+        const newImage = await uploadImage(document.getElementById('editImage').files[0]);
+        const facts = document.getElementById('editFacts').value.split(',').map(f => f.trim()).filter(Boolean);
+        const updates = {
+          name: document.getElementById('editName').value,
+          role: document.getElementById('editRole').value,
+          car_name: document.getElementById('editCarName').value,
+          blurb: document.getElementById('editBlurb').value,
+          facts, accent: document.getElementById('editAccent').value,
+        };
+        if (newImage) updates.image_url = newImage;
+        const { error } = await sb.from('car_submissions').update(updates).eq('id', editingId);
+        if (error) throw error;
+        document.getElementById('editModal').style.display = 'none';
+        this.reset();
+        loadApprovedCars();
+      } catch (err) {
+        console.error(err); alert('Update failed. Please try again.');
+      } finally {
+        btn.textContent = 'Save Changes'; btn.disabled = false;
+      }
+    });
+
+    // ── Delete own car ────────────────────────────────────────────────────────
+
+    async function ownerDelete(id) {
+      if (!confirm('Remove your car from the page?')) return;
+      const car = carsCache[id];
+      if (car?.image_url) {
+        const path = car.image_url.split('/car-images/')[1];
+        if (path) await sb.storage.from('car-images').remove([path]);
+      }
+      const { error } = await sb.from('car_submissions').delete().eq('id', id);
+      if (error) { alert('Delete failed: ' + error.message); return; }
+      loadApprovedCars();
+    }
+
+    // ── Shared image upload helper ────────────────────────────────────────────
+
+    async function uploadImage(file) {
+      if (!file) return null;
+      const path = `${Date.now()}.${file.name.split('.').pop()}`;
+      const { data, error } = await sb.storage.from('car-images').upload(path, file, { cacheControl: '3600' });
+      if (error) throw error;
+      return sb.storage.from('car-images').getPublicUrl(data.path).data.publicUrl;
+    }
   </script>
 
 
