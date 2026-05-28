@@ -388,8 +388,24 @@
 
     // ── Load & render approved cars ───────────────────────────────────────────
 
-    async function loadApprovedCars() {
-      container.innerHTML = '';
+    // async function loadApprovedCars() {
+    //   container.innerHTML = '';
+    //   const { data: cars, error } = await sb
+    //     .from('car_submissions')
+    //     .select('*')
+    //     .eq('status', 'approved')
+    //     .order('created_at', { ascending: false });
+
+    //   if (error) { console.error(error); return; }
+    //   if (!cars || cars.length === 0) {
+    //     container.innerHTML = '<p style="color:var(--muted);text-align:center;padding:2rem 0;">No community submissions yet — be the first!</p>';
+    //     return;
+    //   }
+    //   cars.forEach(car => { carsCache[car.id] = car; renderCar(car); });
+    // }
+
+  async function loadApprovedCars() {
+      // 1. Fetch the data FIRST
       const { data: cars, error } = await sb
         .from('car_submissions')
         .select('*')
@@ -397,10 +413,16 @@
         .order('created_at', { ascending: false });
 
       if (error) { console.error(error); return; }
+
+      // 2. Clear the container AFTER the fetch finishes, right before rendering
+      container.innerHTML = '';
+
       if (!cars || cars.length === 0) {
         container.innerHTML = '<p style="color:var(--muted);text-align:center;padding:2rem 0;">No community submissions yet — be the first!</p>';
         return;
       }
+      
+      // 3. Render the cars
       cars.forEach(car => { carsCache[car.id] = car; renderCar(car); });
     }
 
