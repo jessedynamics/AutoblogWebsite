@@ -9,20 +9,7 @@
 </head>
 <body>
 
-  <header>
-    <div class="header-inner">
-      <div class="logo">
-        <span class="logo-s">S</span>ORMAC
-        <span class="logo-sub">AUTOBLOG</span>
-      </div>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="reviews.html">Reviews</a>
-        <a href="news.html" class="active">Car News</a>
-        <a href="employee-cars.html">Employee Cars</a>
-      </nav>
-    </div>
-  </header>
+  <div id="site-header"></div>
 
   <div class="page-hero">
     <h1>Car News</h1>
@@ -258,12 +245,7 @@
 
   </main>
 
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-logo">SORMAC AUTOBLOG</div>
-      <p>An internal passion project by car enthusiasts, for car enthusiasts.</p>
-    </div>
-  </footer>
+  <div id="site-footer"></div>
 
   <script>
     const PAGE_SIZE = 10;
@@ -351,6 +333,8 @@
     const initialHash = window.location.hash.slice(1);
     if (initialHash) showArticle(initialHash); else showIndex();
   </script>
+
+  <script src="layout.js"></script>
 
 </body>
 </html>

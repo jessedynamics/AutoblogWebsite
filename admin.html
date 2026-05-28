@@ -102,19 +102,7 @@
 </head>
 <body>
 
-  <header>
-    <div class="header-inner">
-      <div class="logo">
-        <span class="logo-s">S</span>ORMAC
-        <span class="logo-sub">AUTOBLOG</span>
-      </div>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="reviews.html">Reviews</a>
-        <a href="employee-cars.html">Employee Cars</a>
-      </nav>
-    </div>
-  </header>
+  <div id="site-header"></div>
 
   <!-- ── Login screen ── -->
   <div id="loginScreen">
@@ -159,12 +147,7 @@
     </main>
   </div>
 
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-logo">SORMAC AUTOBLOG</div>
-      <p>Admin panel — not linked publicly.</p>
-    </div>
-  </footer>
+  <div id="site-footer" data-text="Admin panel — not linked publicly."></div>
 
 <script>
   const { createClient } = window.supabase;
@@ -313,6 +296,8 @@
 
   checkSession();
 </script>
+
+<script src="layout.js"></script>
 
 </body>
 </html>

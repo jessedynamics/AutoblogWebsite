@@ -9,20 +9,7 @@
 </head>
 <body>
 
-  <header>
-    <div class="header-inner">
-      <div class="logo">
-        <span class="logo-s">S</span>ORMAC
-        <span class="logo-sub">AUTOBLOG</span>
-      </div>
-      <nav>
-        <a href="index.html" class="active">Home</a>
-        <a href="reviews.html">Reviews</a>
-        <a href="news.html">Car News</a>
-        <a href="employee-cars.html">Employee Cars</a>
-      </nav>
-    </div>
-  </header>
+  <div id="site-header"></div>
 
   <section class="hero">
     <div class="hero-bg"></div>
@@ -70,12 +57,7 @@
     </div>
   </section>
 
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-logo">SORMAC AUTOBLOG</div>
-      <p>An internal passion project by car enthusiasts, for car enthusiasts.</p>
-    </div>
-  </footer>
+  <div id="site-footer"></div>
 
   <style>
     .loading-placeholder { color: var(--muted); font-style: italic; font-size: 0.9rem; padding: 2rem 0; grid-column: 1 / -1; }
@@ -190,6 +172,8 @@
     loadReviews();
     loadSpotlight();
   </script>
+
+  <script src="layout.js"></script>
 
 </body>
 </html>
