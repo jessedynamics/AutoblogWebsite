@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car News — Sormac Autoblog</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-s">S</span>ORMAC
+        <span class="logo-sub">AUTOBLOG</span>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="reviews.html">Reviews</a>
+        <a href="news.html" class="active">Car News</a>
+        <a href="employee-cars.html">Employee Cars</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <h1>Car News</h1>
+    <p>The latest from the automotive world.</p>
+  </div>
+
+  <main class="news-feed" id="news-feed">
+
+    <a id="news-back-link" href="#" class="news-back-link" style="display:none;">← All Car News</a>
+
+  <!-- Index/list view — built from the articles below by JS -->
+  <div id="news-index">
+    <div id="news-list"></div>
+    <div class="news-pagination" id="news-pagination" style="display:none;">
+      <button id="news-prev" class="btn-page" disabled>← Previous</button>
+      <span id="news-page-info"></span>
+      <button id="news-next" class="btn-page">Next →</button>
+    </div>
+  </div>
+
+    <!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  HOW TO ADD A NEWS ARTICLE                                       ║
+    ║                                                                  ║
+    ║  1. Copy one <article class="news-article"> block below          ║
+    ║  2. Paste it ABOVE the first article (newest at the top)         ║
+    ║  3. Give it a unique id (e.g. id="my-article-title")             ║
+    ║  4. Set data-date, data-category, data-thumb                     ║
+    ║     data-thumb = path to small thumbnail image used on homepage  ║
+    ║  5. Update the image, title, and body text                       ║
+    ║  6. Save — it appears on the homepage automatically              ║
+    ╚══════════════════════════════════════════════════════════════════╝
+    -->
+
+    <article id="lamborghini-temerario" class="news-article"
+      data-date="27 May 2026"
+      data-category="Supercar"
+      data-thumb="images/992.webp">
+      <div class="news-art-img" style="background-image:url('images/m3.jpg'); background-color:#1a0a00;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Supercar</span>
+        <span class="news-art-date">27 May 2026</span>
+      </div>
+      <h2 class="news-title">Lamborghini Temerario: The Huracan Successor Is Here</h2>
+      <div class="news-art-text">
+        <p>Lamborghini has officially pulled the wraps off the Temerario, the long-awaited successor to the Huracan. Unlike its predecessor, the Temerario uses a twin-turbocharged 4.0-litre V8 paired with three electric motors for a combined output of over 900hp.</p>
+        <p>The styling takes clear cues from the Revuelto, with sharp creases, active aerodynamics and a full-width LED light bar at the rear. Inside, the driver-focused cockpit features a new curved display cluster and a dramatically redesigned steering wheel with integrated controls.</p>
+        <p>Lamborghini says deliveries begin in late 2026, with a starting price expected to be around €280,000.</p>
+      </div>
+    </article>
+
+    <article id="renault-5-coty" class="news-article"
+      data-date="24 May 2026"
+      data-category="Award"
+      data-thumb="">
+      <div class="news-art-img" style="background-color:#1a1a2e;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Award</span>
+        <span class="news-art-date">24 May 2026</span>
+      </div>
+      <h2 class="news-title">Renault 5 E-Tech Named European Car of the Year 2026</h2>
+      <div class="news-art-text">
+        <p>The Renault 5 E-Tech Electric has been crowned European Car of the Year 2026, beating the BMW X3 and the Peugeot E-3008 to the title. The jury praised its combination of retro styling, accessible pricing and practical range for urban use.</p>
+        <p>Available in rear-wheel-drive form with up to 400km of WLTP range, the Renault 5 has been a commercial hit since launch. Its success signals growing confidence in affordable, city-focused EVs across the European market.</p>
+      </div>
+    </article>
+
+    <article id="porsche-992-2" class="news-article"
+      data-date="21 May 2026"
+      data-category="Reveal"
+      data-thumb="images/992.webp">
+      <div class="news-art-img" style="background-image:url('images/992.webp'); background-color:#0a0a1a;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Reveal</span>
+        <span class="news-art-date">21 May 2026</span>
+      </div>
+      <h2 class="news-title">Porsche 992.2 911 Officially Revealed — More Power, Hybrid Option</h2>
+      <div class="news-art-text">
+        <p>Porsche has revealed the facelifted 992.2 generation of the 911. The updated Carrera gains a mild-hybrid system adding 28hp for a total of 394hp, along with updated suspension geometry and a refreshed front fascia with slimmer headlights.</p>
+        <p>The interior receives a new steering wheel design, a larger central display and revised seat options. The Carrera S and GTS follow shortly after with their own power increases. The Turbo and GT3 variants are expected in 2027.</p>
+        <p>Pricing starts at €132,000 in the Netherlands, with first deliveries expected in Q4 2026.</p>
+      </div>
+    </article>
+
+    <article id="bmw-m3-touring-pack" class="news-article"
+      data-date="18 May 2026"
+      data-category="Industry"
+      data-thumb="images/m3.jpg">
+      <div class="news-art-img" style="background-image:url('images/m3.jpg'); background-color:#0d1a2a;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Industry</span>
+        <span class="news-art-date">18 May 2026</span>
+      </div>
+      <h2 class="news-title">BMW M3 Competition Touring Gets First-Ever M Performance Pack</h2>
+      <div class="news-art-text">
+        <p>BMW M has announced a new optional M Performance Pack for the M3 Competition Touring, adding carbon-ceramic brakes, a titanium exhaust and lightweight forged wheels as a factory-order option for the first time.</p>
+        <p>The pack also includes a subtle front lip spoiler, carbon mirror caps and an Alcantara headliner. Power remains unchanged at 510hp, but BMW says the weight savings improve the 0–100 km/h time by 0.1 seconds to 3.5 seconds.</p>
+        <p>The M Performance Pack adds approximately €12,000 to the Touring's base price and is available to order now.</p>
+      </div>
+    </article>
+
+    <article id="audi-a6-etron-range" class="news-article"
+      data-date="15 May 2026"
+      data-category="Electric"
+      data-thumb="">
+      <div class="news-art-img" style="background-color:#0a1a0a;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Electric</span>
+        <span class="news-art-date">15 May 2026</span>
+      </div>
+      <h2 class="news-title">Audi A6 e-tron Achieves 756km WLTP Range in Testing</h2>
+      <div class="news-art-text">
+        <p>Audi has confirmed that the A6 e-tron Avant with the 100kWh battery pack has achieved a certified WLTP range of 756km — one of the longest ranges of any production electric estate car in the world.</p>
+        <p>The figure applies to the rear-wheel-drive variant driven in mixed-cycle conditions. Combined with 270kW fast charging capability, the A6 e-tron can add 300km of range in approximately 10 minutes. Audi says this makes it genuinely viable for long continental road trips without anxiety.</p>
+      </div>
+    </article>
+
+    <article id="vw-golf-gti-85" class="news-article"
+      data-date="12 May 2026"
+      data-category="Hot Hatch"
+      data-thumb="images/vw.webp">
+      <div class="news-art-img" style="background-image:url('images/vw.webp'); background-color:#1a1a1a;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Hot Hatch</span>
+        <span class="news-art-date">12 May 2026</span>
+      </div>
+      <h2 class="news-title">Volkswagen Golf GTI 8.5: More Power, New Face, Same Formula</h2>
+      <div class="news-art-text">
+        <p>Volkswagen has revealed the Golf GTI 8.5, a mid-cycle update to the current generation. Power rises from 245hp to 265hp courtesy of revised turbocharger mapping and a new intake manifold. The 0–100 km/h time drops to 5.9 seconds.</p>
+        <p>Visually, the update brings a restyled front bumper, new LED matrix headlights and a wider light strip at the rear. Inside, a new 12.9-inch infotainment screen replaces the smaller unit, and ambient lighting becomes standard across the range.</p>
+        <p>Order books open this summer, with prices expected to start just below €40,000.</p>
+      </div>
+    </article>
+
+    <article id="tesla-model-y-juniper" class="news-article"
+      data-date="9 May 2026"
+      data-category="Electric"
+      data-thumb="images/tesla.jpg">
+      <div class="news-art-img" style="background-image:url('images/tesla.jpg'); background-color:#0a0a0a;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Electric</span>
+        <span class="news-art-date">9 May 2026</span>
+      </div>
+      <h2 class="news-title">Tesla Model Y Juniper: All the Updates Explained</h2>
+      <div class="news-art-text">
+        <p>Tesla's refreshed Model Y — internally codenamed Juniper — has begun deliveries across Europe. The update brings significant changes to the exterior with a new front-end design, flush door handles and a redesigned rear light bar similar to the Model 3 Highland.</p>
+        <p>Inside, the cabin has been overhauled with softer materials, ventilated front seats, rear displays for passengers and a new centre console. The long-range variant now offers up to 600km of WLTP range, an improvement of around 40km over the outgoing model.</p>
+        <p>The Juniper represents Tesla's most significant visual refresh since the original Model Y launched in 2020.</p>
+      </div>
+    </article>
+
+    <article id="mercedes-amg-gt63" class="news-article"
+      data-date="6 May 2026"
+      data-category="Performance"
+      data-thumb="">
+      <div class="news-art-img" style="background-color:#1a0505;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Performance</span>
+        <span class="news-art-date">6 May 2026</span>
+      </div>
+      <h2 class="news-title">Mercedes-AMG GT 63 S E Performance: 831hp, Four Doors, No Excuses</h2>
+      <div class="news-art-text">
+        <p>The Mercedes-AMG GT 63 S E Performance four-door coupé has arrived in the Netherlands, combining a 4.0-litre twin-turbo V8 with an electric rear axle for a total system output of 831hp and 1,400Nm of torque.</p>
+        <p>The result is a 0–100 km/h time of 2.9 seconds and a top speed of 316 km/h, making it the fastest four-door car AMG has ever produced. Despite the performance, it can cover up to 13km on electric power alone in urban conditions.</p>
+        <p>Pricing starts at €219,000 and the first Dutch cars have already been allocated. A waiting list is now in effect.</p>
+      </div>
+    </article>
+
+    <article id="formula-e-s11" class="news-article"
+      data-date="3 May 2026"
+      data-category="Motorsport"
+      data-thumb="">
+      <div class="news-art-img" style="background-color:#001a0a;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Motorsport</span>
+        <span class="news-art-date">3 May 2026</span>
+      </div>
+      <h2 class="news-title">Formula E Season 11 Kicks Off with Record Crowds in São Paulo</h2>
+      <div class="news-art-text">
+        <p>Formula E's eleventh season opened in São Paulo with the highest attended race weekend in the series' history. Over 65,000 fans attended across the two race days, with Brazilian driver Lucas di Grassi taking victory in race one from pole position.</p>
+        <p>The Gen3 Evo cars debuted with revised aerodynamics and a 350kW power output during attack mode. Several manufacturers have confirmed they are evaluating entry into the series for Season 13, including one major Japanese OEM.</p>
+      </div>
+    </article>
+
+    <article id="toyota-gr86-supercharged" class="news-article"
+      data-date="29 April 2026"
+      data-category="Sports Car"
+      data-thumb="">
+      <div class="news-art-img" style="background-color:#1a1000;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Sports Car</span>
+        <span class="news-art-date">29 April 2026</span>
+      </div>
+      <h2 class="news-title">Toyota GR86 Supercharged Concept Hints at Hotter Variant</h2>
+      <div class="news-art-text">
+        <p>Toyota Gazoo Racing has revealed a supercharged concept based on the GR86 at the Tokyo Auto Salon, sparking speculation about a future high-performance variant. The concept uses a Roots-type supercharger on the existing 2.4-litre flat-four, reportedly producing around 320hp.</p>
+        <p>Toyota has not confirmed production plans, but the presence of a full roll cage, wider arches and a ducktail spoiler suggests the concept is more than just a design exercise. A homologation special for GT4 racing has also been rumoured.</p>
+      </div>
+    </article>
+
+    <article id="ford-mustang-mach1-2026" class="news-article"
+      data-date="25 April 2026"
+      data-category="Performance"
+      data-thumb="">
+      <div class="news-art-img" style="background-color:#1a0a00;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Performance</span>
+        <span class="news-art-date">25 April 2026</span>
+      </div>
+      <h2 class="news-title">Ford Mustang Mach 1 Returns with 500hp Coyote V8</h2>
+      <div class="news-art-text">
+        <p>Ford has confirmed the return of the Mach 1 nameplate on the current S650 Mustang platform, slotting between the GT and Shelby GT500 in the range. The Mach 1 uses a revised version of the 5.0-litre Coyote V8, producing 500hp and 556Nm.</p>
+        <p>Standard equipment includes a Tremec 6-speed manual, Brembo brakes, Michelin Pilot Sport 4S tyres and a unique front fascia with an open grille for improved cooling. Only 1,500 units are destined for European markets, making this one to watch for collectors.</p>
+      </div>
+    </article>
+
+    <article id="ev-subsidy-nl-2026" class="news-article"
+      data-date="20 April 2026"
+      data-category="Policy"
+      data-thumb="">
+      <div class="news-art-img" style="background-color:#0a0a1a;"></div>
+      <div class="news-art-meta">
+        <span class="card-tag">Policy</span>
+        <span class="news-art-date">20 April 2026</span>
+      </div>
+      <h2 class="news-title">Dutch Government Extends EV Purchase Subsidy Through 2027</h2>
+      <div class="news-art-text">
+        <p>The Dutch government has announced an extension of the SEPP electric vehicle purchase subsidy scheme through to the end of 2027. Private buyers of new electric passenger cars priced under €45,000 remain eligible for a €2,950 subsidy, while used EV buyers can claim €2,000.</p>
+        <p>The scheme was set to expire at the end of 2026, but the Ministry of Infrastructure confirmed the extension following lobbying from the automotive industry and environmental groups. Budget for the scheme is capped at €115 million for the 2027 period.</p>
+        <p>Demand for the subsidy has been consistently high, with the current-year budget exhausted by September in both 2024 and 2025.</p>
+      </div>
+    </article>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">SORMAC AUTOBLOG</div>
+      <p>An internal passion project by car enthusiasts, for car enthusiasts.</p>
+    </div>
+  </footer>
+
+  <script>
+    const PAGE_SIZE = 10;
+    let articles = [];
+    let currentPage = 0;
+
+    function buildIndex() {
+      articles = Array.from(document.querySelectorAll('article.news-article'));
+      articles.forEach(a => a.style.display = 'none');
+      if (articles.length > PAGE_SIZE) {
+        document.getElementById('news-pagination').style.display = 'flex';
+      }
+      renderPage();
+    }
+
+    function renderPage() {
+      const start = currentPage * PAGE_SIZE;
+      const slice = articles.slice(start, start + PAGE_SIZE);
+      const total = Math.ceil(articles.length / PAGE_SIZE);
+
+      document.getElementById('news-list').innerHTML = slice.map(art => {
+        const id    = art.id;
+        const title = art.querySelector('.news-title')?.textContent.trim() || '';
+        const date  = art.dataset.date || '';
+        const cat   = art.dataset.category || '';
+        const thumb = art.dataset.thumb || '';
+        const meta  = [date, cat].filter(Boolean).join(' · ');
+        return `
+          <a href="#${id}" class="news-row">
+            <div class="news-row-thumb" style="${thumb ? `background-image:url('${thumb}')` : ''}"></div>
+            <div class="news-row-body">
+              <div class="news-row-title">${title}</div>
+              <div class="news-row-meta">${meta}</div>
+            </div>
+          </a>`;
+      }).join('');
+
+      document.getElementById('news-page-info').textContent =
+        total > 1 ? `Page ${currentPage + 1} of ${total}` : '';
+      document.getElementById('news-prev').disabled = currentPage === 0;
+      document.getElementById('news-next').disabled = currentPage >= total - 1;
+    }
+
+    function showIndex() {
+      document.getElementById('news-index').style.display = 'block';
+      articles.forEach(a => a.style.display = 'none');
+      document.getElementById('news-back-link').style.display = 'none';
+      document.title = 'Car News — Sormac Autoblog';
+      window.scrollTo(0, 0);
+    }
+
+    function showArticle(hash) {
+      const target = document.getElementById(hash);
+      if (!target) { showIndex(); return; }
+      document.getElementById('news-index').style.display = 'none';
+      articles.forEach(a => a.style.display = 'none');
+      target.style.display = 'block';
+      document.getElementById('news-back-link').style.display = 'inline-block';
+      const title = target.querySelector('.news-title')?.textContent.trim();
+      if (title) document.title = title + ' — Sormac Autoblog';
+      window.scrollTo(0, 0);
+    }
+
+    document.getElementById('news-prev').addEventListener('click', () => {
+      if (currentPage > 0) { currentPage--; renderPage(); window.scrollTo(0, 0); }
+    });
+    document.getElementById('news-next').addEventListener('click', () => {
+      if (currentPage < Math.ceil(articles.length / PAGE_SIZE) - 1) {
+        currentPage++; renderPage(); window.scrollTo(0, 0);
+      }
+    });
+
+    document.getElementById('news-back-link').addEventListener('click', e => {
+      e.preventDefault();
+      history.pushState(null, '', window.location.pathname);
+      showIndex();
+    });
+
+    window.addEventListener('hashchange', () => {
+      const h = window.location.hash.slice(1);
+      if (h) showArticle(h); else showIndex();
+    });
+
+    buildIndex();
+    const initialHash = window.location.hash.slice(1);
+    if (initialHash) showArticle(initialHash); else showIndex();
+  </script>
+
+</body>
+</html>

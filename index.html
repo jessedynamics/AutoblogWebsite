@@ -18,6 +18,7 @@
       <nav>
         <a href="index.html" class="active">Home</a>
         <a href="reviews.html">Reviews</a>
+        <a href="news.html">Car News</a>
         <a href="employee-cars.html">Employee Cars</a>
       </nav>
     </div>
@@ -29,29 +30,35 @@
       <p class="hero-eyebrow">Welcome to</p>
       <h1>Sormac<br/>Autoblog</h1>
       <p class="hero-sub">Our passion. Our drives. Our reviews.</p>
-      <div class="hero-cta">
-        <a href="reviews.html" class="btn-primary">Read Reviews</a>
-        <a href="employee-cars.html" class="btn-ghost">Employee Cars</a>
-      </div>
-    </div>
-    <div class="hero-stat-bar">
-      <div class="stat"><span class="stat-num" id="stat-reviews">—</span><span class="stat-label">Cars Reviewed</span></div>
-      <div class="stat"><span class="stat-num" id="stat-members">—</span><span class="stat-label">Team Members</span></div>
-      <div class="stat"><span class="stat-num">3</span><span class="stat-label">Years Running</span></div>
     </div>
   </section>
 
+  <!-- Car News -->
+  <section class="news-section">
+    <div class="section-header">
+      <h2>Car News</h2>
+      <a href="news.html" class="see-all">All News →</a>
+    </div>
+    <div id="news-list"></div>
+    <div class="news-pagination" id="news-pagination" style="display:none;">
+      <button id="news-prev" class="btn-page" disabled>← Previous</button>
+      <span id="news-page-info"></span>
+      <button id="news-next" class="btn-page">Next →</button>
+    </div>
+  </section>
+
+  <!-- Latest Reviews -->
   <section class="latest">
     <div class="section-header">
       <h2>Latest Reviews</h2>
       <a href="reviews.html" class="see-all">See All →</a>
     </div>
     <div class="card-grid" id="reviews-grid">
-      <!-- Populated dynamically from reviews.html -->
       <div class="loading-placeholder">Loading reviews…</div>
     </div>
   </section>
 
+  <!-- Meet the Team's Cars -->
   <section class="spotlight">
     <div class="spotlight-inner">
       <div class="spotlight-text">
@@ -59,9 +66,7 @@
         <p>We don't just write about cars — we live with them. See what our team drives on a daily basis, from modest hatchbacks to weekend warriors.</p>
         <a href="employee-cars.html" class="btn-primary">View Employee Cars</a>
       </div>
-      <div class="spotlight-image" id="spotlight-image">
-        <!-- Populated dynamically from employee-cars.html -->
-      </div>
+      <div class="spotlight-image" id="spotlight-image"></div>
     </div>
   </section>
 
@@ -73,66 +78,88 @@
   </footer>
 
   <style>
-    .loading-placeholder {
-      color: var(--muted);
-      font-style: italic;
-      font-size: 0.9rem;
-      padding: 2rem 0;
-      grid-column: 1 / -1;
-    }
-    .error-placeholder {
-      color: var(--accent);
-      font-size: 0.85rem;
-      padding: 1rem 0;
-      grid-column: 1 / -1;
-    }
+    .loading-placeholder { color: var(--muted); font-style: italic; font-size: 0.9rem; padding: 2rem 0; grid-column: 1 / -1; }
+    .error-placeholder   { color: var(--accent); font-size: 0.85rem; padding: 1rem 0; grid-column: 1 / -1; }
   </style>
 
   <script>
-    /**
-     * Fetches an HTML page and parses it into a DOM.
-     */
+    const PAGE_SIZE = 10;
+    let newsArticles = [];
+    let currentPage  = 0;
+
     async function fetchPage(url) {
       const res = await fetch(url);
-      if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-      const text = await res.text();
-      const parser = new DOMParser();
-      return parser.parseFromString(text, 'text/html');
+      if (!res.ok) throw new Error(`${res.status}`);
+      return new DOMParser().parseFromString(await res.text(), 'text/html');
     }
 
-    /**
-     * Reads review-cards from reviews.html and renders the latest 3 as homepage cards.
-     */
+    // ── Car News ─────────────────────────────────────────────────────────────
+    async function loadNews() {
+      try {
+        const doc = await fetchPage('news.html');
+        newsArticles = Array.from(doc.querySelectorAll('article.news-article'));
+        if (newsArticles.length > PAGE_SIZE) {
+          document.getElementById('news-pagination').style.display = 'flex';
+        }
+        renderNewsPage();
+      } catch (e) {
+        document.getElementById('news-list').innerHTML =
+          '<p style="color:var(--muted);font-style:italic;padding:1rem 0;">Could not load news.</p>';
+      }
+    }
+
+    function renderNewsPage() {
+      const start = currentPage * PAGE_SIZE;
+      const slice = newsArticles.slice(start, start + PAGE_SIZE);
+      const total = Math.ceil(newsArticles.length / PAGE_SIZE);
+
+      document.getElementById('news-list').innerHTML = slice.map(art => {
+        const id    = art.id;
+        const title = art.querySelector('.news-title')?.textContent.trim() || '';
+        const date  = art.dataset.date  || '';
+        const cat   = art.dataset.category || '';
+        const thumb = art.dataset.thumb || '';
+        const meta  = [date, cat].filter(Boolean).join(' · ');
+        return `
+          <a href="news.html#${id}" class="news-row">
+            <div class="news-row-thumb" style="${thumb ? `background-image:url('${thumb}')` : ''}"></div>
+            <div class="news-row-body">
+              <div class="news-row-title">${title}</div>
+              <div class="news-row-meta">${meta}</div>
+            </div>
+          </a>`;
+      }).join('');
+
+      document.getElementById('news-page-info').textContent =
+        total > 1 ? `Page ${currentPage + 1} of ${total}` : '';
+      document.getElementById('news-prev').disabled = currentPage === 0;
+      document.getElementById('news-next').disabled = currentPage >= total - 1;
+    }
+
+    document.getElementById('news-prev').addEventListener('click', () => {
+      if (currentPage > 0) { currentPage--; renderNewsPage(); }
+    });
+    document.getElementById('news-next').addEventListener('click', () => {
+      if (currentPage < Math.ceil(newsArticles.length / PAGE_SIZE) - 1) {
+        currentPage++; renderNewsPage();
+      }
+    });
+
+    // ── Latest Reviews ────────────────────────────────────────────────────────
     async function loadReviews() {
       const grid = document.getElementById('reviews-grid');
       try {
-        const doc = await fetchPage('reviews.html');
-        const reviewCards = doc.querySelectorAll('article.review-card');
-
-        // Update stat counter
-        document.getElementById('stat-reviews').textContent = reviewCards.length;
-
-        if (reviewCards.length === 0) {
-          grid.innerHTML = '<div class="error-placeholder">No reviews found.</div>';
-          return;
-        }
-
-        // Take the first 3 (top of the list = most recent per the HOW-TO comment)
-        const latest = Array.from(reviewCards).slice(0, 3);
-
-        grid.innerHTML = latest.map(card => {
-          // Extract data from the review-card structure
-          const imgDiv      = card.querySelector('.review-img');
-          const tag         = card.querySelector('.card-tag')?.textContent.trim() ?? '';
-          const title       = card.querySelector('h2')?.textContent.trim() ?? '';
-          const excerpt     = card.querySelector('.review-excerpt')?.textContent.trim() ?? '';
-
-          // Carry over the background-image + background-color from the source
-          const styleAttr   = imgDiv?.getAttribute('style') ?? 'background-color:#1a1a1a;';
-
+        const doc     = await fetchPage('reviews.html');
+        const cards   = Array.from(doc.querySelectorAll('article.review-card')).slice(0, 3);
+        if (!cards.length) { grid.innerHTML = '<div class="error-placeholder">No reviews found.</div>'; return; }
+        grid.innerHTML = cards.map(card => {
+          const tag     = card.querySelector('.card-tag')?.textContent.trim() ?? '';
+          const title   = card.querySelector('h2')?.textContent.trim() ?? '';
+          const excerpt = card.querySelector('.review-excerpt')?.textContent.trim() ?? '';
+          const style   = card.querySelector('.review-img')?.getAttribute('style') ?? 'background-color:#1a1a1a;';
           return `
             <article class="card">
-              <div class="card-img" style="${styleAttr}"></div>
+              <div class="card-img" style="${style}"></div>
               <div class="card-body">
                 <span class="card-tag">${tag}</span>
                 <h3>${title}</h3>
@@ -141,47 +168,27 @@
               </div>
             </article>`;
         }).join('');
-
-      } catch (err) {
-        console.error(err);
+      } catch (e) {
         grid.innerHTML = '<div class="error-placeholder">Could not load reviews.</div>';
       }
     }
 
-    /**
-     * Reads employee-cars.html and picks the first car image + a unique member count
-     * to populate the spotlight image and team-member stat.
-     */
-    async function loadEmployeeCars() {
+    // ── Spotlight ─────────────────────────────────────────────────────────────
+    async function loadSpotlight() {
       try {
-        const doc = await fetchPage('employee-cars.html');
-        const empCards = doc.querySelectorAll('article.emp-card');
-
-        // Unique member count (by unique avatar letter / emp-name)
-        const names = new Set();
-        empCards.forEach(c => {
-          const name = c.querySelector('.emp-name')?.textContent.trim();
-          if (name) names.add(name);
-        });
-        document.getElementById('stat-members').textContent = names.size;
-
-        // Use first card's car image for the spotlight
-        const firstImg = empCards[0]?.querySelector('.emp-car-img');
+        const doc      = await fetchPage('employee-cars.html');
+        const firstImg = doc.querySelector('article.emp-card .emp-car-img');
         if (firstImg) {
-          const spotlightEl = document.getElementById('spotlight-image');
           const style = firstImg.getAttribute('style') ?? 'background-color:#0a2a1a;';
-          // Apply the car image as a styled child div
-          spotlightEl.innerHTML = `<div class="card-img" style="${style}; height:100%; border-radius: var(--radius);"></div>`;
+          document.getElementById('spotlight-image').innerHTML =
+            `<div class="card-img" style="${style};height:100%;border-radius:var(--radius);"></div>`;
         }
-
-      } catch (err) {
-        console.error(err);
-        document.getElementById('stat-members').textContent = '?';
-      }
+      } catch (e) { /* spotlight image is optional */ }
     }
 
-    // Run both loaders in parallel
-    Promise.all([loadReviews(), loadEmployeeCars()]);
+    loadNews();
+    loadReviews();
+    loadSpotlight();
   </script>
 
 </body>
