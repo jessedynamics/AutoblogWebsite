@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; color: #222; }
+  .wrapper { max-width: 700px; margin: 30px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .header { background: #1a1a2e; color: #fff; padding: 28px 32px; }
+  .header h1 { margin: 0 0 4px 0; font-size: 22px; color: #f0c040; letter-spacing: 0.5px; }
+  .header p { margin: 0; font-size: 14px; color: #aaa; }
+  .section { padding: 20px 32px; border-bottom: 1px solid #eee; }
+  .section h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 14px 0; }
+  .red { color: #c0392b; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; margin: 2px 3px 2px 0; }
+  .badge-backlog { background: #e0e0e0; color: #555; }
+  .badge-todo { background: #d5e8f7; color: #1a6fa0; }
+  .badge-doing { background: #fff3cd; color: #856404; }
+  .badge-extern { background: #e8d5f7; color: #6a0dad; }
+  .badge-done { background: #d5f7e0; color: #1a7a3c; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: #f0f0f0; padding: 8px 10px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; }
+  td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .alert { background: #fff0f0; border-left: 4px solid #c0392b; padding: 10px 14px; margin: 8px 0; border-radius: 4px; font-size: 14px; }
+  .project-row { display: flex; align-items: center; margin: 6px 0; font-size: 14px; }
+  .project-name { width: 160px; font-weight: bold; color: #333; }
+  .focus-box { background: #fffbe6; border: 1px solid #f0c040; border-radius: 6px; padding: 14px 16px; font-size: 14px; }
+  .footer { background: #1a1a2e; color: #888; padding: 14px 32px; font-size: 12px; text-align: center; }
+  .count { font-size: 22px; font-weight: bold; color: #1a1a2e; }
+  .count-label { font-size: 11px; color: #888; }
+  .counts-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0; }
+  .count-box { text-align: center; min-width: 70px; }
+  .overdue { color: #c0392b; font-size: 12px; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <h1>🏭 Sormac R&D — Weekstart</h1>
+    <p>Maandag 2 juni 2026 &nbsp;|&nbsp; Automatisch gegenereerd door Claude AI</p>
+  </div>
+
+  <!-- STATUS OVERZICHT -->
+  <div class="section">
+    <h2>📊 Status Overzicht</h2>
+    <div class="counts-row">
+      <div class="count-box"><div class="count">20</div><div class="badge badge-backlog">Backlog</div></div>
+      <div class="count-box"><div class="count">10</div><div class="badge badge-todo">To Do</div></div>
+      <div class="count-box"><div class="count">6</div><div class="badge badge-doing">Doing</div></div>
+      <div class="count-box"><div class="count">17</div><div class="badge badge-extern">Extern | In Progress</div></div>
+      <div class="count-box"><div class="count">47</div><div class="badge badge-done">Done</div></div>
+    </div>
+  </div>
+
+  <!-- BLOKKADES -->
+  <div class="section">
+    <h2 class="red">🔴 Blokkades &amp; Aandachtspunten</h2>
+    <div class="alert">⏰ <strong>Verlopen deadline — Boven klemconcept uitwerken</strong> (Joos Tegels)<br>Status: Doing — deadline was 22 mei. Voortgang nodig!</div>
+    <div class="alert">⏰ <strong>Verlopen deadline — schmalz test met witlof en snelheden</strong> (Nick Trepels)<br>Status: Extern | In Progress — deadline was 22 mei. Terugkoppeling leverancier nodig.</div>
+    <div class="alert">⏰ <strong>Verlopen deadline — artikelnummer aanvragen e-componenten PCR</strong> (Nick Trepels)<br>Status: Extern | In Progress — deadline was 22 mei. Actie bij Ben nodig.</div>
+    <div class="alert">⏰ <strong>Verlopen deadline — sensor uitwissel</strong> (Jeroen Thijssen)<br>Status: Extern | In Progress — deadline was 21 mei. Opvolgen!</div>
+    <div class="alert">📦 <strong>Grondplaat binnen 29-05</strong> (Nick Trepels / Sjors Triepels)<br>Status: Extern | In Progress — naam suggereert deadline 29 mei. Heeft de grondplaat de werkplaats bereikt?</div>
+    <div class="alert">🔗 <strong>17 taken extern in progress</strong> — meerdere leveranciers/externe partijen wachten op follow-up. Zie details hieronder.</div>
+  </div>
+
+  <!-- ACTIEVE TAKEN PER PERSOON -->
+  <div class="section">
+    <h2>👤 Workload per Teamlid</h2>
+    <table>
+      <tr><th>Naam</th><th>Actieve taken (Doing + To Do)</th><th>Extern IP</th></tr>
+      <tr>
+        <td><strong>Sven Hazenbosch</strong></td>
+        <td>4 — Geharde pockets offerte, Lijn aansturing herzien, Rapport Stourgarden, Test voorbereiden</td>
+        <td>1 — Dertec issues (USM-H100)</td>
+      </tr>
+      <tr>
+        <td><strong>Jelle Moors</strong></td>
+        <td>3 — BSM mal microlassen, Ontwerpen PC55 mal, Opsturen inkooporder</td>
+        <td>2 — Reactie arm boven, Klembus rotatie-as</td>
+      </tr>
+      <tr>
+        <td><strong>Jesse B</strong></td>
+        <td>3 — Claude showcase, Bespreken offerte Concept Robotics, Cyclustijd PVW+robot+WOS</td>
+        <td>1 — Camera applicatie IPC (Dynamic USM-H)</td>
+      </tr>
+      <tr>
+        <td><strong>Nick Trepels</strong></td>
+        <td>2 — Uitzoeken frezen PC55 ring, Programma Sbom</td>
+        <td>7 — Yves offerte, Codian bellen, Schmalz test, Artikelnummer PCR, Grondplaat, PVW baan, Cyclustijden Staubli</td>
+      </tr>
+      <tr>
+        <td><strong>Sjors Triepels</strong></td>
+        <td>2 — Uitzoeken frezen PC55 ring, Ontwerpen PC55 mal</td>
+        <td>4 — Lekpunt boogzeef, Trislot K850, Klembus rotatie-as, Herontwerp DMA mes, Grondplaat</td>
+      </tr>
+      <tr>
+        <td><strong>Jeroen Thijssen</strong></td>
+        <td>2 — Kosten (DC-145), Analyse doorlezen (Dynamic USM-H)</td>
+        <td>1 — Sensor uitwissel (BSM) ⚠️ verlopen</td>
+      </tr>
+      <tr>
+        <td><strong>Joos Tegels</strong></td>
+        <td>2 — Inplannen meeting (Grid 3D), Boven klemconcept uitwerken ⚠️</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <td><strong>Casper Besseling</strong></td>
+        <td>0</td>
+        <td>2 — Toevoegen Data Stourgarden, Toevoegen Data NWF (IoT)</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- PROJECT OVERZICHT -->
+  <div class="section">
+    <h2>🏷️ Project Overzicht per Tag</h2>
+    <table>
+      <tr><th>Project</th><th>To Do</th><th>Doing</th><th>Extern IP</th><th>Backlog</th><th>Done</th></tr>
+      <tr><td><strong>Witlof</strong></td><td>1</td><td>1</td><td>5</td><td>1</td><td>8+</td></tr>
+      <tr><td><strong>Messenproductie</strong></td><td>1</td><td>2</td><td>3</td><td>2</td><td>5+</td></tr>
+      <tr><td><strong>Algemeen</strong></td><td>1</td><td>0</td><td>1</td><td>0</td><td>10+</td></tr>
+      <tr><td><strong>DC-145</strong></td><td>2</td><td>0</td><td>0</td><td>2</td><td>1</td></tr>
+      <tr><td><strong>USM-H100</strong></td><td>2</td><td>1</td><td>2</td><td>0</td><td>1</td></tr>
+      <tr><td><strong>Multi Decoring</strong></td><td>0</td><td>1</td><td>0</td><td>1</td><td>5+</td></tr>
+      <tr><td><strong>PCR</strong></td><td>1</td><td>0</td><td>1</td><td>0</td><td>4</td></tr>
+      <tr><td><strong>Lice Filtration</strong></td><td>0</td><td>0</td><td>1</td><td>3</td><td>3</td></tr>
+      <tr><td><strong>Dynamic USM-H</strong></td><td>1</td><td>0</td><td>1</td><td>1</td><td>2</td></tr>
+      <tr><td><strong>CRA</strong></td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+      <tr><td><strong>IoT</strong></td><td>0</td><td>0</td><td>2</td><td>0</td><td>0</td></tr>
+      <tr><td><strong>BSM</strong></td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+      <tr><td><strong>FC-800</strong></td><td>0</td><td>0</td><td>1</td><td>0</td><td>4</td></tr>
+    </table>
+  </div>
+
+  <!-- RECENT AFGEROND -->
+  <div class="section">
+    <h2>✅ Recent Afgerond</h2>
+    <p style="font-size:14px;">Goed werk team! De volgende taken zijn afgerond:</p>
+    <table>
+      <tr><th>Taak</th><th>Wie</th><th>Project</th></tr>
+      <tr><td>Stands test verwerken</td><td>Joos / Casper</td><td>Multi Decoring</td></tr>
+      <tr><td>Test transportband verwerken</td><td>Joos / Casper</td><td>Multi Decoring</td></tr>
+      <tr><td>Werkplek Jeroen</td><td>Sjors</td><td>Algemeen</td></tr>
+      <tr><td>Testen transportband → WOS</td><td>Jesse B</td><td>Witlof</td></tr>
+      <tr><td>Testen stansen met luchtcilinder</td><td>Casper</td><td>Multi Decoring</td></tr>
+      <tr><td>Testen stansen met deelmes</td><td>Casper</td><td>Multi Decoring</td></tr>
+      <tr><td>Documentatie bijwerken</td><td>Nick</td><td>Witlof</td></tr>
+      <tr><td>Bezoek Schmalz</td><td>Nick / Jesse B</td><td>Witlof</td></tr>
+      <tr><td>Lassen DMA mes 1,1mm sleuf</td><td>Nick</td><td>Messenproductie</td></tr>
+      <tr><td>Camera applicatie maken zonder halcon</td><td>Jesse B</td><td>Dynamic USM-H</td></tr>
+      <tr><td>Instructies ombouw boogzeef</td><td>Sjors</td><td>Lice Filtration</td></tr>
+      <tr><td>Cyclustijden robots Codian</td><td>Nick</td><td>Witlof</td></tr>
+    </table>
+  </div>
+
+  <!-- TAAK VAN DE WEEK -->
+  <div class="section">
+    <h2>📌 Taak van de Week</h2>
+    <div class="focus-box">
+      <strong>🎯 Codian bellen met voorstel 50 pcs/min</strong> — Nick Trepels<br><br>
+      Dit is de meest urgente taak voor het witlof-project. Het Codian-voorstel (deltarobot, 50 pcs/min) is een cruciale input voor de robotica-conceptkeuze. De taak staat al enige tijd extern in progress en de deadline is verlopen. Nick: bel Codian vandaag nog op en zorg voor een concrete offerte vóór het einde van de week. De beslissing over het robottype (Codian vs. Staubli) kan pas gemaakt worden wanneer beide offertes op tafel liggen.
+    </div>
+  </div>
+
+  <div class="footer">
+    Gegenereerd door Claude AI via ClickUp MCP integratie &nbsp;|&nbsp; Sormac R&amp;D &nbsp;|&nbsp; 2 juni 2026
+  </div>
+</div>
+</body>
+</html>
