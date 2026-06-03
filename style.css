@@ -157,6 +157,7 @@ nav a:hover, nav a.active {
 .btn-primary:hover { background: #c42f23; transform: translateY(-1px); }
 .btn-ghost {
   display: inline-block;
+  background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
   font-weight: 600;
@@ -452,6 +453,56 @@ nav a:hover, nav a.active {
 .emp-blurb { font-size: 0.93rem; color: var(--muted); line-height: 1.75; margin-bottom: 1.2rem; }
 .emp-facts { display: flex; flex-direction: column; gap: 0.4rem; }
 .emp-facts li { font-size: 0.88rem; color: var(--text); }
+
+/* ── Subnav bar (autoblog section nav, rendered below the main header row) ── */
+.subnav-bar {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+.subnav-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 2rem;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.subnav-label {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  display: flex;
+  align-items: baseline;
+  gap: 0.1em;
+  flex-shrink: 0;
+}
+.subnav-label .logo-s  { color: var(--accent); }
+.subnav-label .logo-sub { font-size: 0.62rem; }
+.subnav { display: flex; gap: 1.5rem; }
+.subnav a {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.subnav a:hover, .subnav a.active {
+  color: var(--white);
+  border-color: var(--accent);
+}
+@media (max-width: 860px) {
+  .subnav { gap: 1rem; }
+}
+@media (max-width: 540px) {
+  .subnav-inner { padding: 0 1rem; }
+  .subnav-label { display: none; }
+  .subnav a { font-size: 0.7rem; }
+}
 
 /* ── Footer ── */
 footer {

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Info — Jesse Beuman</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <style>
+    .gate-wrap {
+      max-width: 400px;
+      margin: 5rem auto;
+      padding: 0 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .gate-wrap h2 {
+      font-family: var(--font-head);
+      font-size: 2rem;
+      color: var(--white);
+      letter-spacing: 0.06em;
+    }
+    .gate-wrap p { color: var(--muted); font-size: 0.9rem; }
+    .gate-wrap input {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .gate-wrap input:focus { outline: none; border-color: var(--accent); }
+    .btn-unlock {
+      background: var(--accent, #e63b2e);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.85rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s, opacity 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .btn-unlock:hover:not(:disabled) { background: #c42f23; }
+    .btn-unlock:disabled { opacity: 0.55; cursor: not-allowed; }
+    #gate-error { color: var(--accent); font-size: 0.88rem; min-height: 1.2em; margin: 0; }
+
+    /* ── Info content ── */
+    .info-greeting {
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      max-width: 720px;
+      margin: 2rem auto 1.5rem;
+      padding: 0 2rem;
+    }
+    .info-grid {
+      max-width: 720px;
+      margin: 0 auto 4rem;
+      padding: 0 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .info-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+    }
+    .info-card-title {
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      margin: 0 0 1rem;
+    }
+    .info-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .info-list li {
+      color: var(--text);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      padding-left: 1.1rem;
+      position: relative;
+    }
+    .info-list li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--border);
+    }
+    .info-name {
+      color: var(--accent2);
+      font-weight: 600;
+    }
+    .info-card--pcr {
+      border-color: var(--bg3);
+      background: var(--bg);
+      text-align: center;
+    }
+    .info-pcr-quote {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 1.05rem;
+      margin: 0;
+    }
+    .info-topbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+      max-width: 720px;
+      margin: 2rem auto 0;
+      padding: 0 2rem;
+    }
+    .info-topbar span { font-size: 0.82rem; color: var(--muted); }
+    .btn-logout {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.4rem 1rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-logout:hover { border-color: var(--white); color: var(--white); }
+  </style>
+</head>
+<body>
+
+  <div id="site-header"></div>
+
+  <div class="page-hero">
+    <h1>Info</h1>
+    <p>Alles wat je moet weten zolang ik op vakantie ben.</p>
+  </div>
+
+  <!-- ── Login form (shown when not authenticated) ── -->
+  <div id="login-screen">
+    <div class="gate-wrap">
+      <h2>Inloggen vereist</h2>
+      <p>Deze pagina is beveiligd. Log in om de inhoud te bekijken.</p>
+      <form id="login-form" style="display:flex;flex-direction:column;gap:1rem;">
+        <input type="email"    id="info-email" placeholder="E-mailadres" required autocomplete="email" />
+        <input type="password" id="info-pass"  placeholder="Wachtwoord"  required autocomplete="current-password" />
+        <button type="submit" class="btn-unlock" id="login-btn">Inloggen</button>
+        <p id="gate-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Protected content (shown when authenticated) ── -->
+  <div id="protected-content" style="display:none;">
+
+    <div class="info-topbar">
+      <span id="logged-in-as"></span>
+      <button class="btn-logout" id="logout-btn">Uitloggen</button>
+    </div>
+
+    <main class="page-main" style="max-width:720px;">
+
+      <p class="info-greeting">Heren,</p>
+
+      <div class="info-grid">
+
+        <div class="info-card">
+          <h3 class="info-card-title">DUSMH</h3>
+          <ul class="info-list">
+            <li>Bezig met een headless webapplicatie. Hierdoor hebben we dus geen scherm nodig maar kan je op een aangesloten laptop via de browser naar de UI.</li>
+            <li>Met RealVNC eventueel nog de PC te besturen.</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3 class="info-card-title">Camera-opstelling</h3>
+          <ul class="info-list">
+            <li><span class="info-name">Piet</span> — Bij Jansen informeren of we daar een cameraopstelling op mogen bouwen.</li>
+            <li>Camera-opstelling bouwen. <span class="info-name">Casper?</span></li>
+            <li>Camera met behuizing uit optipro halen en op een frame monteren. De optipro dus wel intact laten verder.</li>
+            <li><span class="info-name">Dennis</span> heeft een E-kast beschikbaar, dus die voorbereiden.</li>
+            <li>Eventueel nadenken over een waterdichte ethernet aansluiting. Zodat eenvoudig een laptop aangesloten kan worden on-site.</li>
+            <li>We hadden het over een trigger methode die alleen werkt als de USM in running is. Dat zou nog gemaakt moeten worden.</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3 class="info-card-title">Witlof</h3>
+          <ul class="info-list">
+            <li>Test uitvoeren ter validatie van concept onderdeel — <span class="info-name">Jelle?</span></li>
+            <li>De PVW stort op een transportband in rijen. Op de transportband zijn meer rijen dan dat er PVW rijen zijn. Zo is er dus ruimte op de transportband om in elke rij maar 1 witlof te leggen.</li>
+            <li>Het zou getest moeten worden of vanaf de PVW gecontroleerd in rijen gestort kan worden op een transportband. De witlof moet idealiter recht blijven liggen.</li>
+            <li>Omdat de transportband rijen precies op de WOS pockets aansluiten mag de witlof ook niet doorrollen. Dus waarschijnlijk iets met pockets/gleuven?</li>
+            <li>De robot moet wel nog kunnen pakken vanaf de transportband.</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3 class="info-card-title">Offerte Concept Robotics</h3>
+          <ul class="info-list">
+            <li>Offerte naar inkoop gemaild met de vraag of ze het willen regelen met Concept Robotics.</li>
+            <li><span class="info-name">Randy</span> gemaild met de mededeling dat we de offerte goedkeuren.</li>
+            <li><span class="info-name">Jurjen</span> heeft het opgepakt.</li>
+            <li><span class="info-name">24 juni</span> afspraak ingepland met Concept Robotics.</li>
+          </ul>
+        </div>
+
+        <div class="info-card info-card--pcr">
+          <h3 class="info-card-title">PCR</h3>
+          <p class="info-pcr-quote">Löp es 'n zönneke</p>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <div id="site-footer"></div>
+
+<script>
+  (function () {
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    /* ── Only this account may view the page ─────────────────────────────── */
+    var ALLOWED_EMAIL = 'jessesormac@gmail.com';
+
+    /* ── Show / hide screens ──────────────────────────────────────────────── */
+    function showContent(user) {
+      document.getElementById('login-screen').style.display    = 'none';
+      document.getElementById('protected-content').style.display = '';
+      document.getElementById('logged-in-as').textContent      = user.email;
+    }
+
+    function showLogin() {
+      document.getElementById('login-screen').style.display    = '';
+      document.getElementById('protected-content').style.display = 'none';
+    }
+
+    /* ── Check existing session on load ──────────────────────────────────── */
+    sb.auth.getSession().then(async function (result) {
+      if (result.data.session) {
+        if (result.data.session.user.email === ALLOWED_EMAIL) {
+          showContent(result.data.session.user);
+        } else {
+          /* Correct Supabase account but not the allowed one — sign out silently */
+          await sb.auth.signOut();
+        }
+      }
+    });
+
+    /* ── Login form submit ────────────────────────────────────────────────── */
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var btn   = document.getElementById('login-btn');
+      var error = document.getElementById('gate-error');
+      btn.textContent = 'Bezig…';
+      btn.disabled    = true;
+      error.textContent = '';
+
+      var result = await sb.auth.signInWithPassword({
+        email:    document.getElementById('info-email').value,
+        password: document.getElementById('info-pass').value,
+      });
+
+      if (result.error) {
+        error.textContent = 'Onjuist e-mailadres of wachtwoord.';
+        btn.textContent   = 'Inloggen';
+        btn.disabled      = false;
+      } else if (result.data.user.email !== ALLOWED_EMAIL) {
+        /* Valid Supabase credentials but not the permitted account */
+        await sb.auth.signOut();
+        error.textContent = 'Dit account heeft geen toegang tot deze pagina.';
+        btn.textContent   = 'Inloggen';
+        btn.disabled      = false;
+      } else {
+        showContent(result.data.user);
+      }
+    });
+
+    /* ── Logout ───────────────────────────────────────────────────────────── */
+    document.getElementById('logout-btn').addEventListener('click', async function () {
+      await sb.auth.signOut();
+      showLogin();
+    });
+
+    /* ── Clear error on input ─────────────────────────────────────────────── */
+    ['info-email', 'info-pass'].forEach(function (id) {
+      document.getElementById(id).addEventListener('input', function () {
+        document.getElementById('gate-error').textContent = '';
+      });
+    });
+  })();
+</script>
+
+<script src="../sections-layout.js"></script>
+</body>
+</html>

@@ -3,9 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sormac Autoblog</title>
+  <title>Jesse Beuman</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    .sections-wrapper {
+      max-width: var(--max-w);
+      margin: 4rem auto 6rem;
+      padding: 0 2rem;
+    }
+    .sections-intro {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .sections-intro h2 {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .sections-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .section-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem 2rem;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, border-top-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .section-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(230,59,46,0.06) 0%, transparent 65%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .section-card:hover {
+      transform: translateY(-5px);
+      border-top-color: var(--accent);
+      box-shadow: 0 12px 40px rgba(230,59,46,0.1);
+    }
+    .section-card:hover::before { opacity: 1; }
+    .section-num {
+      font-family: var(--font-head);
+      font-size: 5rem;
+      line-height: 1;
+      color: var(--bg3);
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      pointer-events: none;
+      user-select: none;
+    }
+    .section-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: var(--font-head);
+      font-size: 2.8rem;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+    .section-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+      flex: 1;
+      margin-bottom: 1.75rem;
+    }
+    .section-link {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      transition: letter-spacing 0.2s;
+    }
+    .section-card:hover .section-link { letter-spacing: 0.22em; }
+
+    @media (max-width: 540px) {
+      .section-title { font-size: 2.2rem; }
+    }
+  </style>
 </head>
 <body>
 
@@ -13,167 +115,56 @@
 
   <section class="hero">
     <div class="hero-bg"></div>
-    <div class="hero-content">
-      <p class="hero-eyebrow">Welcome to</p>
-      <h1>Sormac<br/>Autoblog</h1>
-      <p class="hero-sub">Our passion. Our drives. Our reviews.</p>
+    <div class="hero-content" style="text-align:center;">
+      <p class="hero-eyebrow">Welkom op mijn website</p>
+      <h1>Jesse<br/>Beuman</h1>
+      <p class="hero-sub">Kies een sectie hieronder.</p>
     </div>
   </section>
 
-  <!-- Car News -->
-  <section class="news-section">
-    <div class="section-header">
-      <h2>Car News</h2>
-      <a href="news.html" class="see-all">All News →</a>
+  <div class="sections-wrapper">
+    <div class="sections-intro">
+      <h2>Secties</h2>
     </div>
-    <div id="news-list"></div>
-    <div class="news-pagination" id="news-pagination" style="display:none;">
-      <button id="news-prev" class="btn-page" disabled>← Previous</button>
-      <span id="news-page-info"></span>
-      <button id="news-next" class="btn-page">Next →</button>
+    <div class="sections-grid">
+
+      <a href="autoblog/" class="section-card">
+        <span class="section-num">01</span>
+        <p class="section-eyebrow">Blog</p>
+        <h2 class="section-title">Autoblog</h2>
+        <p class="section-desc">Autoreviews, nieuws en de wagens van het team — geschreven door autofanaten, voor autofanaten.</p>
+        <span class="section-link">Naar de Autoblog →</span>
+      </a>
+
+      <a href="fotolijstjes/" class="section-card">
+        <span class="section-num">02</span>
+        <p class="section-eyebrow">Album</p>
+        <h2 class="section-title">Fotolijst&shy;jes</h2>
+        <p class="section-desc">Digitaal fotoalbum. Gesorteerd op datum of tag, zodat je altijd snel het goede moment terugvindt.</p>
+        <span class="section-link">Bekijk foto's →</span>
+      </a>
+
+      <a href="info/" class="section-card">
+        <span class="section-num">03</span>
+        <p class="section-eyebrow">Over</p>
+        <h2 class="section-title">Info</h2>
+        <p class="section-desc">Informatie over deze website en wie er achter zit.</p>
+        <span class="section-link">Meer info →</span>
+      </a>
+
+      <a href="vakantie/" class="section-card">
+        <span class="section-num">04</span>
+        <p class="section-eyebrow">Reizen</p>
+        <h2 class="section-title">Vakantie Blog</h2>
+        <p class="section-desc">Verhalen en foto's van vakanties — gesorteerd per bestemming.</p>
+        <span class="section-link">Lees blogs →</span>
+      </a>
+
     </div>
-  </section>
+  </div>
 
-  <!-- Latest Reviews -->
-  <section class="latest">
-    <div class="section-header">
-      <h2>Latest Reviews</h2>
-      <a href="reviews.html" class="see-all">See All →</a>
-    </div>
-    <div class="card-grid" id="reviews-grid">
-      <div class="loading-placeholder">Loading reviews…</div>
-    </div>
-  </section>
+  <div id="site-footer" data-logo="JESSE BEUMAN" data-text="jessebeuman.com"></div>
 
-  <!-- Meet the Team's Cars -->
-  <section class="spotlight">
-    <div class="spotlight-inner">
-      <div class="spotlight-text">
-        <h2>Meet the Team's Cars</h2>
-        <p>We don't just write about cars — we live with them. See what our team drives on a daily basis, from modest hatchbacks to weekend warriors.</p>
-        <a href="employee-cars.html" class="btn-primary">View Employee Cars</a>
-      </div>
-      <div class="spotlight-image" id="spotlight-image"></div>
-    </div>
-  </section>
-
-  <div id="site-footer"></div>
-
-  <style>
-    .loading-placeholder { color: var(--muted); font-style: italic; font-size: 0.9rem; padding: 2rem 0; grid-column: 1 / -1; }
-    .error-placeholder   { color: var(--accent); font-size: 0.85rem; padding: 1rem 0; grid-column: 1 / -1; }
-  </style>
-
-  <script>
-    const PAGE_SIZE = 10;
-    let newsArticles = [];
-    let currentPage  = 0;
-
-    async function fetchPage(url) {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`${res.status}`);
-      return new DOMParser().parseFromString(await res.text(), 'text/html');
-    }
-
-    // ── Car News ─────────────────────────────────────────────────────────────
-    async function loadNews() {
-      try {
-        const doc = await fetchPage('news.html');
-        newsArticles = Array.from(doc.querySelectorAll('article.news-article'));
-        if (newsArticles.length > PAGE_SIZE) {
-          document.getElementById('news-pagination').style.display = 'flex';
-        }
-        renderNewsPage();
-      } catch (e) {
-        document.getElementById('news-list').innerHTML =
-          '<p style="color:var(--muted);font-style:italic;padding:1rem 0;">Could not load news.</p>';
-      }
-    }
-
-    function renderNewsPage() {
-      const start = currentPage * PAGE_SIZE;
-      const slice = newsArticles.slice(start, start + PAGE_SIZE);
-      const total = Math.ceil(newsArticles.length / PAGE_SIZE);
-
-      document.getElementById('news-list').innerHTML = slice.map(art => {
-        const id    = art.id;
-        const title = art.querySelector('.news-title')?.textContent.trim() || '';
-        const date  = art.dataset.date  || '';
-        const cat   = art.dataset.category || '';
-        const thumb = art.dataset.thumb || '';
-        const meta  = [date, cat].filter(Boolean).join(' · ');
-        return `
-          <a href="news.html#${id}" class="news-row">
-            <div class="news-row-thumb" style="${thumb ? `background-image:url('${thumb}')` : ''}"></div>
-            <div class="news-row-body">
-              <div class="news-row-title">${title}</div>
-              <div class="news-row-meta">${meta}</div>
-            </div>
-          </a>`;
-      }).join('');
-
-      document.getElementById('news-page-info').textContent =
-        total > 1 ? `Page ${currentPage + 1} of ${total}` : '';
-      document.getElementById('news-prev').disabled = currentPage === 0;
-      document.getElementById('news-next').disabled = currentPage >= total - 1;
-    }
-
-    document.getElementById('news-prev').addEventListener('click', () => {
-      if (currentPage > 0) { currentPage--; renderNewsPage(); }
-    });
-    document.getElementById('news-next').addEventListener('click', () => {
-      if (currentPage < Math.ceil(newsArticles.length / PAGE_SIZE) - 1) {
-        currentPage++; renderNewsPage();
-      }
-    });
-
-    // ── Latest Reviews ────────────────────────────────────────────────────────
-    async function loadReviews() {
-      const grid = document.getElementById('reviews-grid');
-      try {
-        const doc     = await fetchPage('reviews.html');
-        const cards   = Array.from(doc.querySelectorAll('article.review-card')).slice(0, 3);
-        if (!cards.length) { grid.innerHTML = '<div class="error-placeholder">No reviews found.</div>'; return; }
-        grid.innerHTML = cards.map(card => {
-          const tag     = card.querySelector('.card-tag')?.textContent.trim() ?? '';
-          const title   = card.querySelector('h2')?.textContent.trim() ?? '';
-          const excerpt = card.querySelector('.review-excerpt')?.textContent.trim() ?? '';
-          const style   = card.querySelector('.review-img')?.getAttribute('style') ?? 'background-color:#1a1a1a;';
-          return `
-            <article class="card">
-              <div class="card-img" style="${style}"></div>
-              <div class="card-body">
-                <span class="card-tag">${tag}</span>
-                <h3>${title}</h3>
-                <p>${excerpt}</p>
-                <a href="reviews.html" class="card-link">Read Review →</a>
-              </div>
-            </article>`;
-        }).join('');
-      } catch (e) {
-        grid.innerHTML = '<div class="error-placeholder">Could not load reviews.</div>';
-      }
-    }
-
-    // ── Spotlight ─────────────────────────────────────────────────────────────
-    async function loadSpotlight() {
-      try {
-        const doc      = await fetchPage('employee-cars.html');
-        const firstImg = doc.querySelector('article.emp-card .emp-car-img');
-        if (firstImg) {
-          const style = firstImg.getAttribute('style') ?? 'background-color:#0a2a1a;';
-          document.getElementById('spotlight-image').innerHTML =
-            `<div class="card-img" style="${style};height:100%;border-radius:var(--radius);"></div>`;
-        }
-      } catch (e) { /* spotlight image is optional */ }
-    }
-
-    loadNews();
-    loadReviews();
-    loadSpotlight();
-  </script>
-
-  <script src="layout.js"></script>
-
+<script src="layout.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /**
- * layout.js — Shared header & footer for the root-level pages.
+ * layout.js — Shared header & footer for Autoblog sub-section pages.
  *
  * HOW TO USE ON A NEW PAGE:
  *   1. Add  <div id="site-header"></div>  as the first child of <body>
@@ -8,20 +8,19 @@
  *
  * Active nav links are detected automatically from the page filename.
  * Footer text can be overridden with  data-text="..."  on #site-footer.
- * Footer logo can be overridden with  data-logo="..."  on #site-footer.
  */
 (function () {
   'use strict';
 
   /* ── Top-level sections (shown on every page) ───────────────────────────── */
   const SECTIONS = [
-    { href: 'autoblog/',     label: 'Autoblog' },
-    { href: 'fotolijstjes/', label: 'Fotolijstjes' },
-    { href: 'info/',         label: 'Info' },
-    { href: 'vakantie/',     label: 'Vakantie' },
+    { href: '../autoblog/',     label: 'Autoblog' },
+    { href: '../fotolijstjes/', label: 'Fotolijstjes' },
+    { href: '../info/',         label: 'Info' },
+    { href: '../vakantie/',     label: 'Vakantie' },
   ];
 
-  /* ── Autoblog sub-nav (shown on autoblog pages, not the homepage) ────────── */
+  /* ── Autoblog sub-nav ────────────────────────────────────────────────────── */
   const AUTOBLOG_NAV = [
     { href: 'index.html',         label: 'Home' },
     { href: 'reviews.html',       label: 'Reviews' },
@@ -30,26 +29,33 @@
   ];
 
   /* ── Detect current page ─────────────────────────────────────────────────  */
-  const page       = location.pathname.split('/').pop() || 'index.html';
-  const isHomepage = (page === 'index.html' || page === '');
+  const page = location.pathname.split('/').pop() || 'index.html';
 
   /* ── Build header HTML ───────────────────────────────────────────────────  */
   function buildHeader() {
-    /* Secties links — mark Autoblog active when on any non-homepage root page */
+    /* Secties links — Autoblog is always active here */
     const sectionLinks = SECTIONS.map(({ href, label }) => {
-      const isActive = !isHomepage && href === 'autoblog/';
+      const isActive = href === '../autoblog/';
       return `<a href="${href}"${isActive ? ' class="active"' : ''}>${label}</a>`;
     }).join('\n        ');
 
-    /* Autoblog sub-nav — only rendered on non-homepage pages */
-    let subnav = '';
-    if (!isHomepage) {
-      const autoblogLinks = AUTOBLOG_NAV.map(({ href, label }) => {
-        const active = (href === page) ? ' class="active"' : '';
-        return `<a href="${href}"${active}>${label}</a>`;
-      }).join('\n          ');
+    /* Autoblog sub-nav */
+    const autoblogLinks = AUTOBLOG_NAV.map(({ href, label }) => {
+      const active = (href === page || (href === 'index.html' && page === ''))
+        ? ' class="active"' : '';
+      return `<a href="${href}"${active}>${label}</a>`;
+    }).join('\n          ');
 
-      subnav = `
+    return `<header>
+    <div class="header-inner">
+      <a href="../index.html" class="logo">
+        <span class="logo-s">J</span>ESSE
+        <span class="logo-sub">BEUMAN</span>
+      </a>
+      <nav>
+        ${sectionLinks}
+      </nav>
+    </div>
     <div class="subnav-bar">
       <div class="subnav-inner">
         <div class="subnav-label">
@@ -60,19 +66,7 @@
           ${autoblogLinks}
         </nav>
       </div>
-    </div>`;
-    }
-
-    return `<header>
-    <div class="header-inner">
-      <a href="index.html" class="logo">
-        <span class="logo-s">J</span>ESSE
-        <span class="logo-sub">BEUMAN</span>
-      </a>
-      <nav>
-        ${sectionLinks}
-      </nav>
-    </div>${subnav}
+    </div>
   </header>`;
   }
 
@@ -80,10 +74,9 @@
   function buildFooter(el) {
     const note = (el && el.dataset.text)
       || 'An internal passion project by car enthusiasts, for car enthusiasts.';
-    const logo = (el && el.dataset.logo) || 'JESSE BEUMAN';
     return `<footer>
     <div class="footer-inner">
-      <div class="footer-logo">${logo}</div>
+      <div class="footer-logo">SORMAC AUTOBLOG</div>
       <p>${note}</p>
     </div>
   </footer>`;

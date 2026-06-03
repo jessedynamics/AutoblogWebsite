@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<!--
+  SUPABASE SETUP — run this in your Supabase SQL editor before using this page:
+
+  create table photos (
+    id uuid default gen_random_uuid() primary key,
+    created_at timestamptz default now(),
+    url text not null,
+    date date,
+    tags text[] default '{}',
+    title text
+  );
+  alter table photos enable row level security;
+  create policy "public_read"  on photos for select using (true);
+  create policy "auth_insert"  on photos for insert with check (auth.uid() is not null);
+  create policy "auth_delete"  on photos for delete  using (auth.uid() is not null);
+
+  In Supabase Storage: create a PUBLIC bucket named exactly "photos".
+  Add a storage INSERT policy for authenticated users and DELETE for authenticated users.
+-->
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fotolijstjes — Jesse Beuman</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <style>
+    /* ── Admin bar ── */
+    .admin-bar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 0.55rem 2rem;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+    }
+    .admin-bar-email { font-size: 0.8rem; color: var(--muted); }
+
+    /* ── Toolbar ── */
+    .foto-toolbar {
+      max-width: var(--max-w);
+      margin: 2rem auto 1.5rem;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .tag-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .tag-chip {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      padding: 0.28rem 0.75rem;
+      border-radius: 2rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      background: transparent;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      font-family: var(--font-body);
+      white-space: nowrap;
+    }
+    .tag-chip:hover { border-color: var(--text); color: var(--text); }
+    .tag-chip.active { background: var(--accent); border-color: var(--accent); color: var(--white); }
+
+    .sort-select {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      padding: 0.38rem 0.75rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .sort-select:focus { outline: none; border-color: var(--accent); }
+
+    .foto-count { font-size: 0.8rem; color: var(--muted); flex-shrink: 0; }
+
+    /* ── Photo grid ── */
+    .foto-wrapper {
+      max-width: var(--max-w);
+      margin: 0 auto 6rem;
+      padding: 0 2rem;
+    }
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 0.75rem;
+    }
+    .photo-card {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: var(--radius);
+      cursor: pointer;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+    }
+    .photo-card-img {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.35s ease;
+    }
+    .photo-card:hover .photo-card-img { transform: scale(1.06); }
+    .photo-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.25s;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0.9rem;
+      gap: 0.3rem;
+    }
+    .photo-card:hover .photo-card-overlay { opacity: 1; }
+    .photo-card-title {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--white);
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .photo-card-date { font-size: 0.75rem; color: rgba(255,255,255,0.65); }
+    .photo-card-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+    .photo-tag-pill {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: rgba(230,59,46,0.75);
+      color: #fff;
+      padding: 0.1rem 0.45rem;
+      border-radius: 2px;
+    }
+    .photo-delete-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--white);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.2s, background 0.15s;
+    }
+    .photo-card:hover .photo-delete-btn { opacity: 1; }
+    .photo-delete-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+    .gallery-empty, .gallery-loading, .gallery-error {
+      grid-column: 1 / -1;
+      padding: 4rem 0;
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .gallery-error { color: var(--accent); }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      background: rgba(0,0,0,0.94);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      padding: 1rem;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+    .lb-close {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.6rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.15s;
+      z-index: 10;
+    }
+    .lb-close:hover { color: var(--white); }
+    .lb-img-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 90vw;
+      max-height: 78vh;
+    }
+    .lb-img {
+      max-width: 88vw;
+      max-height: 76vh;
+      object-fit: contain;
+      border-radius: var(--radius);
+      display: block;
+    }
+    .lb-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--white);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      z-index: 5;
+      flex-shrink: 0;
+    }
+    .lb-arrow:hover { background: rgba(230,59,46,0.7); }
+    .lb-arrow:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+    .lb-prev { left: -54px; }
+    .lb-next { right: -54px; }
+    .lb-info {
+      margin-top: 1rem;
+      text-align: center;
+      max-width: 600px;
+    }
+    .lb-title { font-weight: 600; color: var(--white); font-size: 1rem; margin-bottom: 0.25rem; }
+    .lb-date  { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .lb-tags  { display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap; }
+    .lb-counter {
+      position: absolute;
+      bottom: 1.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    @media (max-width: 700px) {
+      .lb-prev { left: 0.3rem; }
+      .lb-next { right: 0.3rem; }
+      .lb-img  { max-width: 92vw; max-height: 60vh; }
+    }
+
+    /* ── Login modal ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+    }
+    .modal-title {
+      font-family: var(--font-head);
+      font-size: 1.8rem;
+      letter-spacing: 0.05em;
+      color: var(--white);
+      margin-bottom: 1.25rem;
+    }
+    .modal-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .modal-input:focus { outline: none; border-color: var(--accent); }
+    .modal-error { color: var(--accent); font-size: 0.85rem; min-height: 1.2em; margin-bottom: 0.5rem; }
+    .modal-close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    /* ── Upload modal ── */
+    .upload-modal-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 90%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .upload-modal-box::-webkit-scrollbar { width: 5px; }
+    .upload-modal-box::-webkit-scrollbar-track { background: var(--bg3); }
+    .upload-modal-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .upload-section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .upload-preview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .tag-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      min-height: 2rem;
+      align-items: center;
+    }
+    .new-tag-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .new-tag-input {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 0.45rem 0.75rem;
+    }
+    .new-tag-input:focus { outline: none; border-color: var(--accent); }
+    .btn-add-tag {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      padding: 0.45rem 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-add-tag:hover { border-color: var(--white); color: var(--white); }
+
+    .selected-tags-section {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.65rem 0.75rem;
+      margin-top: 0.5rem;
+      min-height: 2.5rem;
+    }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+    @media (max-width: 540px) {
+      .foto-toolbar { flex-direction: column; align-items: flex-start; }
+      .photo-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="site-header"></div>
+
+  <!-- ── Admin bar ── -->
+  <div class="admin-bar" id="admin-bar">
+    <button id="login-btn" class="btn-ghost" style="font-size:0.78rem;padding:0.35rem 1rem;">Admin login</button>
+  </div>
+
+  <!-- ── Page hero ── -->
+  <div class="page-hero">
+    <h1>Fotolijstjes</h1>
+    <p>Digitaal fotoalbum — gesorteerd op datum of tag.</p>
+  </div>
+
+  <!-- ── Filter / sort toolbar ── -->
+  <div class="foto-toolbar">
+    <div class="tag-filter-bar" id="tag-filter-bar">
+      <button class="tag-chip active" data-tag="">Alles</button>
+    </div>
+    <select class="sort-select" id="sort-select">
+      <option value="desc">Nieuwste eerst</option>
+      <option value="asc">Oudste eerst</option>
+    </select>
+    <span class="foto-count" id="foto-count"></span>
+  </div>
+
+  <!-- ── Photo gallery ── -->
+  <div class="foto-wrapper">
+    <div class="photo-grid" id="photo-grid">
+      <div class="gallery-loading">Foto's laden…</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       LIGHTBOX
+       ══════════════════════════════════════════════════════════ -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+    <button class="lb-close" id="lb-close" aria-label="Sluiten">&#x2715;</button>
+    <div class="lb-img-wrap">
+      <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Vorige">&#8249;</button>
+      <img class="lb-img" id="lb-img" src="" alt="" />
+      <button class="lb-arrow lb-next" id="lb-next" aria-label="Volgende">&#8250;</button>
+    </div>
+    <div class="lb-info">
+      <div class="lb-title" id="lb-title"></div>
+      <div class="lb-date"  id="lb-date"></div>
+      <div class="lb-tags"  id="lb-tags"></div>
+    </div>
+    <div class="lb-counter" id="lb-counter"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       LOGIN MODAL
+       ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="login-modal">
+    <div class="modal-box" style="position:relative;">
+      <button class="modal-close-btn" id="login-modal-close">&#x2715;</button>
+      <h2 class="modal-title">Admin login</h2>
+      <p class="modal-error" id="login-error"></p>
+      <form id="login-form">
+        <input type="email"    class="modal-input" id="login-email" placeholder="E-mailadres"  required autocomplete="email" />
+        <input type="password" class="modal-input" id="login-pass"  placeholder="Wachtwoord"   required autocomplete="current-password" />
+        <button type="submit" class="btn-primary" id="login-submit" style="width:100%;margin-top:0.25rem;">Inloggen</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       UPLOAD MODAL (admin only)
+       ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="upload-modal">
+    <div class="upload-modal-box">
+      <button class="modal-close-btn" id="upload-modal-close">&#x2715;</button>
+      <h2 class="modal-title">Foto uploaden</h2>
+
+      <form id="upload-form">
+
+        <!-- File -->
+        <label class="upload-section-label">Foto *</label>
+        <input type="file" id="upload-file" accept="image/*" required style="color:var(--text);display:block;margin-bottom:0.25rem;" />
+        <img class="upload-preview" id="upload-preview" alt="Preview" />
+
+        <hr class="divider" />
+
+        <!-- Title -->
+        <label class="upload-section-label" for="upload-title">Titel (optioneel)</label>
+        <input type="text" class="modal-input" id="upload-title" placeholder="Bijv. Zonsondergang op het strand" style="margin-bottom:0;" />
+
+        <hr class="divider" />
+
+        <!-- Date -->
+        <label class="upload-section-label" for="upload-date">Datum foto *</label>
+        <input type="date" class="modal-input" id="upload-date" required style="margin-bottom:0;" />
+
+        <hr class="divider" />
+
+        <!-- Tags -->
+        <label class="upload-section-label">Tags</label>
+
+        <label class="upload-section-label" style="letter-spacing:0;font-weight:400;text-transform:none;font-size:0.8rem;margin-bottom:0.4rem;">Selecteer bestaande tags:</label>
+        <div class="tag-chips-row" id="existing-tags-chips">
+          <span style="color:var(--muted);font-size:0.82rem;font-style:italic;">Nog geen tags.</span>
+        </div>
+
+        <div class="new-tag-row">
+          <input type="text" class="new-tag-input" id="new-tag-input" placeholder="Nieuwe tag typen…" maxlength="40" />
+          <button type="button" class="btn-add-tag" id="add-tag-btn">+ Toevoegen</button>
+        </div>
+
+        <label class="upload-section-label" style="letter-spacing:0;font-weight:400;text-transform:none;font-size:0.8rem;margin-top:0.9rem;margin-bottom:0.3rem;">Geselecteerde tags:</label>
+        <div class="selected-tags-section" id="selected-tags-display">
+          <span style="color:var(--muted);font-size:0.82rem;">Geen tags geselecteerd.</span>
+        </div>
+
+        <hr class="divider" />
+
+        <button type="submit" class="btn-primary" id="upload-submit" style="width:100%;">Uploaden</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       JAVASCRIPT
+       ══════════════════════════════════════════════════════════ -->
+  <script>
+  (function () {
+    'use strict';
+
+    const { createClient } = window.supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // ── State ──────────────────────────────────────────────────────────────────
+    let allPhotos      = [];
+    let filteredPhotos = [];
+    let existingTags   = [];
+    let activeTag      = null;
+    let sortOrder      = 'desc';
+    let currentUser    = null;
+    let isAdmin        = false;
+    let lbIndex        = 0;
+    let uploadTags     = new Set();
+
+    function esc(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function fmtDate(d) {
+      if (!d) return '';
+      return new Date(d + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    // ── Auth ───────────────────────────────────────────────────────────────────
+    sb.auth.onAuthStateChange((_event, session) => {
+      currentUser = session?.user ?? null;
+      isAdmin = !!(currentUser && currentUser.email === ADMIN_EMAIL);
+      updateAdminBar();
+      renderGallery();
+    });
+
+    function updateAdminBar() {
+      const bar = document.getElementById('admin-bar');
+      if (currentUser) {
+        bar.innerHTML = `
+          <span class="admin-bar-email">${esc(currentUser.email)}</span>
+          ${isAdmin ? '<button id="upload-open-btn" class="btn-primary" style="font-size:0.78rem;padding:0.35rem 1.1rem;animation:none;">+ Upload foto</button>' : ''}
+          <button id="logout-btn" class="btn-ghost" style="font-size:0.78rem;padding:0.35rem 1rem;">Uitloggen</button>`;
+
+        document.getElementById('logout-btn').addEventListener('click', () => sb.auth.signOut());
+        if (isAdmin) {
+          document.getElementById('upload-open-btn').addEventListener('click', openUploadModal);
+        }
+      } else {
+        bar.innerHTML = '<button id="login-btn" class="btn-ghost" style="font-size:0.78rem;padding:0.35rem 1rem;">Admin login</button>';
+        document.getElementById('login-btn').addEventListener('click', () => {
+          document.getElementById('login-modal').classList.add('open');
+        });
+      }
+    }
+
+    // ── Login form ─────────────────────────────────────────────────────────────
+    document.getElementById('login-modal-close').addEventListener('click', () => {
+      document.getElementById('login-modal').classList.remove('open');
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const errEl = document.getElementById('login-error');
+      const btn   = document.getElementById('login-submit');
+      btn.textContent = 'Inloggen…'; btn.disabled = true; errEl.textContent = '';
+
+      const { error } = await sb.auth.signInWithPassword({
+        email:    document.getElementById('login-email').value,
+        password: document.getElementById('login-pass').value,
+      });
+
+      if (error) {
+        errEl.textContent = 'Onjuist e-mailadres of wachtwoord.';
+        btn.textContent = 'Inloggen'; btn.disabled = false;
+      } else {
+        document.getElementById('login-modal').classList.remove('open');
+        this.reset();
+        btn.textContent = 'Inloggen'; btn.disabled = false;
+      }
+    });
+
+    // ── Load photos ────────────────────────────────────────────────────────────
+    async function loadPhotos() {
+      document.getElementById('photo-grid').innerHTML = '<div class="gallery-loading">Foto\'s laden…</div>';
+      const { data, error } = await sb.from('photos').select('*');
+      if (error) {
+        document.getElementById('photo-grid').innerHTML = `<div class="gallery-error">Kon foto's niet laden: ${esc(error.message)}</div>`;
+        return;
+      }
+      allPhotos    = data || [];
+      existingTags = [...new Set(allPhotos.flatMap(p => p.tags || []))].sort();
+      renderFilterBar();
+      applyFilterSort();
+    }
+
+    // ── Filter bar ─────────────────────────────────────────────────────────────
+    function renderFilterBar() {
+      const bar = document.getElementById('tag-filter-bar');
+      const chips = [
+        `<button class="tag-chip ${activeTag === null ? 'active' : ''}" data-tag="">Alles</button>`,
+        ...existingTags.map(t =>
+          `<button class="tag-chip ${activeTag === t ? 'active' : ''}" data-tag="${esc(t)}">${esc(t)}</button>`
+        ),
+      ].join('');
+      bar.innerHTML = chips;
+      bar.querySelectorAll('.tag-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          activeTag = chip.dataset.tag || null;
+          renderFilterBar();
+          applyFilterSort();
+        });
+      });
+    }
+
+    document.getElementById('sort-select').addEventListener('change', function () {
+      sortOrder = this.value;
+      applyFilterSort();
+    });
+
+    // ── Apply filter + sort ────────────────────────────────────────────────────
+    function applyFilterSort() {
+      let photos = activeTag
+        ? allPhotos.filter(p => (p.tags || []).includes(activeTag))
+        : [...allPhotos];
+
+      photos.sort((a, b) => {
+        const da = new Date(a.date || a.created_at);
+        const db = new Date(b.date || b.created_at);
+        return sortOrder === 'desc' ? db - da : da - db;
+      });
+
+      filteredPhotos = photos;
+      renderGallery();
+    }
+
+    // ── Gallery ────────────────────────────────────────────────────────────────
+    function renderGallery() {
+      const grid    = document.getElementById('photo-grid');
+      const countEl = document.getElementById('foto-count');
+      const n       = filteredPhotos.length;
+      countEl.textContent = n === 0 ? '' : `${n} foto${n !== 1 ? "'s" : ''}`;
+
+      if (n === 0) {
+        grid.innerHTML = '<div class="gallery-empty">Geen foto\'s gevonden.</div>';
+        return;
+      }
+
+      grid.innerHTML = filteredPhotos.map((photo, i) => {
+        const tags  = (photo.tags || []).map(t => `<span class="photo-tag-pill">${esc(t)}</span>`).join('');
+        const delBtn = isAdmin
+          ? `<button class="photo-delete-btn" data-id="${esc(photo.id)}" data-url="${esc(photo.url)}" title="Verwijder">&#x2715;</button>`
+          : '';
+        return `
+          <div class="photo-card" data-index="${i}">
+            ${delBtn}
+            <div class="photo-card-img" style="background-image:url('${esc(photo.url)}')"></div>
+            <div class="photo-card-overlay">
+              ${photo.title ? `<div class="photo-card-title">${esc(photo.title)}</div>` : ''}
+              <div class="photo-card-date">${fmtDate(photo.date)}</div>
+              <div class="photo-card-tags">${tags}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      grid.querySelectorAll('.photo-card').forEach(card => {
+        card.addEventListener('click', e => {
+          if (e.target.closest('.photo-delete-btn')) return;
+          openLightbox(parseInt(card.dataset.index, 10));
+        });
+      });
+
+      if (isAdmin) {
+        grid.querySelectorAll('.photo-delete-btn').forEach(btn => {
+          btn.addEventListener('click', () => deletePhoto(btn.dataset.id, btn.dataset.url));
+        });
+      }
+    }
+
+    // ── Delete photo ───────────────────────────────────────────────────────────
+    async function deletePhoto(id, url) {
+      if (!confirm('Foto permanent verwijderen?')) return;
+      const pathMatch = url.match(/\/photos\/(.+)$/);
+      if (pathMatch) {
+        await sb.storage.from('photos').remove([decodeURIComponent(pathMatch[1])]);
+      }
+      const { error } = await sb.from('photos').delete().eq('id', id);
+      if (error) { alert('Verwijderen mislukt: ' + error.message); return; }
+      await loadPhotos();
+    }
+
+    // ── Lightbox ───────────────────────────────────────────────────────────────
+    function openLightbox(index) {
+      lbIndex = index;
+      renderLightbox();
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function renderLightbox() {
+      const photo = filteredPhotos[lbIndex];
+      if (!photo) return;
+      const tags = (photo.tags || []).map(t => `<span class="tag-chip" style="cursor:default;">${esc(t)}</span>`).join('');
+      document.getElementById('lb-img').src         = photo.url;
+      document.getElementById('lb-img').alt         = photo.title || '';
+      document.getElementById('lb-title').textContent = photo.title || '';
+      document.getElementById('lb-date').textContent  = fmtDate(photo.date);
+      document.getElementById('lb-tags').innerHTML    = tags;
+      document.getElementById('lb-counter').textContent = `${lbIndex + 1} / ${filteredPhotos.length}`;
+      document.getElementById('lb-prev').disabled = lbIndex === 0;
+      document.getElementById('lb-next').disabled = lbIndex === filteredPhotos.length - 1;
+    }
+
+    document.getElementById('lb-close').addEventListener('click', closeLightbox);
+    document.getElementById('lb-prev').addEventListener('click', () => { if (lbIndex > 0) { lbIndex--; renderLightbox(); } });
+    document.getElementById('lb-next').addEventListener('click', () => { if (lbIndex < filteredPhotos.length - 1) { lbIndex++; renderLightbox(); } });
+
+    document.getElementById('lightbox').addEventListener('click', e => {
+      if (e.target === document.getElementById('lightbox')) closeLightbox();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape')     closeLightbox();
+      if (e.key === 'ArrowLeft')  { if (lbIndex > 0) { lbIndex--; renderLightbox(); } }
+      if (e.key === 'ArrowRight') { if (lbIndex < filteredPhotos.length - 1) { lbIndex++; renderLightbox(); } }
+    });
+
+    // ── Upload modal ───────────────────────────────────────────────────────────
+    function openUploadModal() {
+      uploadTags = new Set();
+      document.getElementById('upload-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('upload-title').value = '';
+      document.getElementById('upload-file').value  = '';
+      document.getElementById('upload-preview').style.display = 'none';
+      document.getElementById('new-tag-input').value = '';
+      renderUploadExistingChips();
+      renderUploadSelectedTags();
+      document.getElementById('upload-modal').classList.add('open');
+    }
+
+    document.getElementById('upload-modal-close').addEventListener('click', () => {
+      document.getElementById('upload-modal').classList.remove('open');
+    });
+
+    document.getElementById('upload-file').addEventListener('change', function () {
+      const file    = this.files[0];
+      const preview = document.getElementById('upload-preview');
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+
+    function renderUploadExistingChips() {
+      const container = document.getElementById('existing-tags-chips');
+      if (existingTags.length === 0) {
+        container.innerHTML = '<span style="color:var(--muted);font-size:0.82rem;font-style:italic;">Nog geen bestaande tags.</span>';
+        return;
+      }
+      container.innerHTML = existingTags.map(t =>
+        `<button type="button" class="tag-chip upload-tag-chip ${uploadTags.has(t) ? 'active' : ''}" data-tag="${esc(t)}">${esc(t)}</button>`
+      ).join('');
+      container.querySelectorAll('.upload-tag-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const t = chip.dataset.tag;
+          uploadTags.has(t) ? uploadTags.delete(t) : uploadTags.add(t);
+          renderUploadExistingChips();
+          renderUploadSelectedTags();
+        });
+      });
+    }
+
+    function renderUploadSelectedTags() {
+      const container = document.getElementById('selected-tags-display');
+      if (uploadTags.size === 0) {
+        container.innerHTML = '<span style="color:var(--muted);font-size:0.82rem;">Geen tags geselecteerd.</span>';
+        return;
+      }
+      container.innerHTML = [...uploadTags].map(t =>
+        `<button type="button" class="tag-chip active remove-upload-tag" data-tag="${esc(t)}" style="margin:2px;">${esc(t)} &times;</button>`
+      ).join('');
+      container.querySelectorAll('.remove-upload-tag').forEach(btn => {
+        btn.addEventListener('click', () => {
+          uploadTags.delete(btn.dataset.tag);
+          renderUploadExistingChips();
+          renderUploadSelectedTags();
+        });
+      });
+    }
+
+    function addNewUploadTag() {
+      const input = document.getElementById('new-tag-input');
+      const tag   = input.value.trim();
+      if (!tag) return;
+      uploadTags.add(tag);
+      if (!existingTags.includes(tag)) { existingTags.push(tag); existingTags.sort(); }
+      input.value = '';
+      renderUploadExistingChips();
+      renderUploadSelectedTags();
+    }
+
+    document.getElementById('add-tag-btn').addEventListener('click', addNewUploadTag);
+    document.getElementById('new-tag-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); addNewUploadTag(); }
+    });
+
+    // ── Upload submit ──────────────────────────────────────────────────────────
+    document.getElementById('upload-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn  = document.getElementById('upload-submit');
+      const file = document.getElementById('upload-file').files[0];
+      if (!file) { alert('Kies een foto.'); return; }
+
+      btn.textContent = 'Uploaden…'; btn.disabled = true;
+
+      try {
+        const ext  = file.name.split('.').pop().toLowerCase();
+        const path = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+        const { data: storageData, error: storageErr } = await sb.storage
+          .from('photos')
+          .upload(path, file, { cacheControl: '3600' });
+        if (storageErr) throw storageErr;
+
+        const url = sb.storage.from('photos').getPublicUrl(storageData.path).data.publicUrl;
+
+        const { error: dbErr } = await sb.from('photos').insert([{
+          url,
+          date:  document.getElementById('upload-date').value  || null,
+          title: document.getElementById('upload-title').value.trim() || null,
+          tags:  [...uploadTags],
+        }]);
+        if (dbErr) throw dbErr;
+
+        document.getElementById('upload-modal').classList.remove('open');
+        this.reset();
+        document.getElementById('upload-preview').style.display = 'none';
+        uploadTags = new Set();
+        await loadPhotos();
+      } catch (err) {
+        console.error(err);
+        alert('Upload mislukt: ' + err.message);
+      } finally {
+        btn.textContent = 'Uploaden'; btn.disabled = false;
+      }
+    });
+
+    // ── Init ───────────────────────────────────────────────────────────────────
+    loadPhotos();
+
+  })();
+  </script>
+
+  <div id="site-footer"></div>
+
+<script src="../sections-layout.js"></script>
+</body>
+</html>

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<!--
+  SUPABASE SETUP — run in Supabase SQL editor:
+
+  create table blogs (
+    id uuid default gen_random_uuid() primary key,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    title text not null,
+    story text,
+    tags text[] default '{}',
+    published boolean default false
+  );
+  alter table blogs enable row level security;
+  create policy "public_read" on blogs for select using (published = true);
+  create policy "auth_all"    on blogs for all    using (auth.uid() is not null) with check (auth.uid() is not null);
+
+  create table blog_images (
+    id uuid default gen_random_uuid() primary key,
+    blog_id uuid references blogs(id) on delete cascade not null,
+    url text not null,
+    sort_order integer default 0
+  );
+  alter table blog_images enable row level security;
+  create policy "public_read" on blog_images for select using (true);
+  create policy "auth_insert" on blog_images for insert with check (auth.uid() is not null);
+  create policy "auth_update" on blog_images for update using (auth.uid() is not null);
+  create policy "auth_delete" on blog_images for delete using (auth.uid() is not null);
+
+  Storage: create a PUBLIC bucket named "blog-images".
+  Add INSERT and DELETE policies for authenticated users.
+-->
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vakantie Blog — Jesse Beuman</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <style>
+    /* ── Admin bar ── */
+    .admin-bar { background:var(--bg2); border-bottom:1px solid var(--border); padding:0.55rem 2rem; display:flex; justify-content:flex-end; align-items:center; gap:1rem; }
+    .admin-bar-email { font-size:0.8rem; color:var(--muted); }
+
+    /* ── Filter toolbar ── */
+    .vak-toolbar { max-width:var(--max-w); margin:2rem auto 1.5rem; padding:0 2rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .tag-filter-bar { display:flex; gap:0.5rem; flex-wrap:wrap; flex:1; align-items:center; }
+    .tag-chip { font-size:0.7rem; font-weight:600; letter-spacing:0.13em; text-transform:uppercase; padding:0.28rem 0.75rem; border-radius:2rem; border:1px solid var(--border); color:var(--muted); cursor:pointer; background:transparent; transition:border-color 0.15s,color 0.15s,background 0.15s; font-family:var(--font-body); white-space:nowrap; }
+    .tag-chip:hover { border-color:var(--text); color:var(--text); }
+    .tag-chip.active { background:var(--accent); border-color:var(--accent); color:var(--white); }
+
+    /* ── Blog list grid ── */
+    .vak-wrapper { max-width:var(--max-w); margin:0 auto 6rem; padding:0 2rem; }
+    .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1.5rem; }
+    .blog-card { position:relative; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:transform 0.2s,border-color 0.2s,box-shadow 0.2s; }
+    .blog-card:hover { transform:translateY(-4px); border-color:rgba(230,59,46,0.35); box-shadow:0 8px 32px rgba(230,59,46,0.08); }
+    .blog-card-cover { height:210px; background-size:cover; background-position:center; background-color:var(--bg3); }
+    .blog-card-body { padding:1.25rem 1.5rem 1.5rem; }
+    .blog-card-tags { display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.6rem; }
+    .blog-tag-pill { font-size:0.65rem; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; border:1px solid var(--accent); color:var(--accent); padding:0.12rem 0.5rem; border-radius:3px; }
+    .draft-badge { font-size:0.65rem; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; background:var(--accent2); color:#000; padding:0.12rem 0.5rem; border-radius:3px; }
+    .blog-card-title { font-family:var(--font-head); font-size:1.5rem; color:var(--white); letter-spacing:0.04em; line-height:1.15; margin-bottom:0.5rem; }
+    .blog-card-excerpt { font-size:0.88rem; color:var(--muted); line-height:1.65; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .blog-card-date { font-size:0.75rem; color:var(--muted); letter-spacing:0.08em; margin-top:0.75rem; }
+    .blog-card-admin { position:absolute; top:0.6rem; right:0.6rem; display:flex; gap:0.4rem; opacity:0; transition:opacity 0.2s; }
+    .blog-card:hover .blog-card-admin { opacity:1; }
+    .btn-edit { font-size:0.7rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; padding:0.3rem 0.7rem; border-radius:var(--radius); background:rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.2); color:var(--white); cursor:pointer; transition:background 0.15s; font-family:var(--font-body); }
+    .btn-edit:hover { background:var(--bg2); }
+    .btn-del-card { font-size:0.7rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; padding:0.3rem 0.7rem; border-radius:var(--radius); background:rgba(0,0,0,0.7); border:1px solid rgba(230,59,46,0.5); color:var(--accent); cursor:pointer; transition:background 0.15s; font-family:var(--font-body); }
+    .btn-del-card:hover { background:var(--accent); color:#fff; }
+
+    /* ── Blog detail ── */
+    #detail-view { display:none; }
+    .detail-back { display:inline-block; font-size:0.82rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); margin-bottom:2rem; cursor:pointer; transition:letter-spacing 0.2s; }
+    .detail-back:hover { letter-spacing:0.16em; }
+    .detail-hero { height:400px; background-size:cover; background-position:center; background-color:var(--bg3); border-radius:var(--radius); border:1px solid var(--border); margin-bottom:2.5rem; }
+    .detail-meta { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+    .detail-title { font-family:var(--font-head); font-size:clamp(2.5rem,7vw,5rem); color:var(--white); letter-spacing:0.04em; line-height:1; margin-bottom:1rem; }
+    .detail-date { font-size:0.8rem; color:var(--muted); letter-spacing:0.1em; }
+    .detail-story { font-size:1rem; color:var(--muted); line-height:1.85; white-space:pre-wrap; word-wrap:break-word; margin:2rem 0; max-width:720px; }
+    .detail-admin-row { display:flex; gap:0.75rem; margin-bottom:2rem; }
+
+    .detail-images-title { font-family:var(--font-head); font-size:1.8rem; color:var(--white); letter-spacing:0.06em; margin-bottom:1.25rem; margin-top:2.5rem; }
+    .detail-img-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:0.75rem; }
+    .detail-img-card { aspect-ratio:1; overflow:hidden; border-radius:var(--radius); cursor:pointer; background:var(--bg3); border:1px solid var(--border); }
+    .detail-img-card img { width:100%; height:100%; object-fit:cover; transition:transform 0.3s; display:block; }
+    .detail-img-card:hover img { transform:scale(1.06); }
+
+    /* ── Lightbox ── */
+    .lightbox { position:fixed; inset:0; z-index:900; background:rgba(0,0,0,0.94); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.2s; padding:1rem; }
+    .lightbox.open { opacity:1; pointer-events:all; }
+    .lb-close { position:absolute; top:1.2rem; right:1.5rem; background:none; border:none; color:var(--muted); font-size:1.6rem; cursor:pointer; line-height:1; transition:color 0.15s; z-index:10; }
+    .lb-close:hover { color:var(--white); }
+    .lb-img-wrap { position:relative; display:flex; align-items:center; justify-content:center; }
+    .lb-img { max-width:88vw; max-height:80vh; object-fit:contain; border-radius:var(--radius); display:block; }
+    .lb-arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); color:var(--white); width:44px; height:44px; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s; z-index:5; }
+    .lb-arrow:hover { background:rgba(230,59,46,0.7); }
+    .lb-arrow:disabled { opacity:0.2; cursor:default; pointer-events:none; }
+    .lb-prev { left:-56px; }
+    .lb-next { right:-56px; }
+    .lb-counter { margin-top:1rem; font-size:0.78rem; color:var(--muted); letter-spacing:0.1em; }
+    @media(max-width:700px) { .lb-prev{left:0.3rem;} .lb-next{right:0.3rem;} }
+
+    /* ── Editor overlay ── */
+    .editor-overlay { position:fixed; inset:0; z-index:800; background:rgba(0,0,0,0.7); display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:2rem 1rem; }
+    .editor-overlay.open { display:flex; }
+    .editor-panel { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); width:100%; max-width:680px; display:flex; flex-direction:column; margin:auto; }
+    .editor-header { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.75rem; border-bottom:1px solid var(--border); }
+    .editor-header h2 { font-family:var(--font-head); font-size:1.6rem; color:var(--white); letter-spacing:0.05em; }
+    .editor-header-close { background:none; border:none; color:var(--muted); font-size:1.4rem; cursor:pointer; line-height:1; transition:color 0.15s; }
+    .editor-header-close:hover { color:var(--white); }
+    .editor-body { padding:1.75rem; display:flex; flex-direction:column; gap:1.5rem; }
+    .editor-field { display:flex; flex-direction:column; gap:0.5rem; }
+    .editor-label { font-size:0.72rem; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); }
+    .editor-input, .editor-textarea { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--font-body); font-size:0.95rem; padding:0.7rem 1rem; width:100%; }
+    .editor-input:focus, .editor-textarea:focus { outline:none; border-color:var(--accent); }
+    .editor-textarea { resize:vertical; min-height:160px; line-height:1.7; }
+    .editor-divider { border:none; border-top:1px solid var(--border); }
+
+    /* Toggle */
+    .toggle-row { display:flex; align-items:center; gap:0.85rem; }
+    .toggle-switch { position:relative; width:48px; height:26px; flex-shrink:0; }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; cursor:pointer; inset:0; background:var(--bg3); border:1px solid var(--border); border-radius:26px; transition:0.2s; }
+    .toggle-slider::before { position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px; background:var(--muted); border-radius:50%; transition:0.2s; }
+    .toggle-switch input:checked + .toggle-slider { background:var(--accent); border-color:var(--accent); }
+    .toggle-switch input:checked + .toggle-slider::before { transform:translateX(22px); background:#fff; }
+    .toggle-label { font-size:0.88rem; color:var(--muted); }
+    .toggle-label.published { color:#22c55e; }
+
+    /* Tag chips in editor */
+    .tag-chips-row { display:flex; flex-wrap:wrap; gap:0.4rem; min-height:2rem; align-items:center; }
+    .new-tag-row { display:flex; gap:0.5rem; margin-top:0.5rem; }
+    .new-tag-input { flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--font-body); font-size:0.88rem; padding:0.42rem 0.75rem; }
+    .new-tag-input:focus { outline:none; border-color:var(--accent); }
+    .btn-add-tag { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--font-body); font-size:0.8rem; padding:0.42rem 0.9rem; cursor:pointer; transition:border-color 0.15s,color 0.15s; white-space:nowrap; }
+    .btn-add-tag:hover { border-color:var(--white); color:var(--white); }
+    .selected-tags-box { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:0.6rem 0.75rem; min-height:2.4rem; display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center; }
+
+    /* Editor images */
+    .editor-img-hint { font-size:0.82rem; color:var(--muted); font-style:italic; }
+    .editor-images-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:0.6rem; margin-bottom:0.75rem; }
+    .editor-img-item { position:relative; aspect-ratio:1; border-radius:var(--radius); overflow:hidden; border:2px solid var(--border); cursor:grab; transition:border-color 0.15s,opacity 0.15s; user-select:none; }
+    .editor-img-item.dragging { opacity:0.4; }
+    .editor-img-item.drag-over { border-color:var(--accent); }
+    .editor-img-thumb { width:100%; height:100%; background-size:cover; background-position:center; pointer-events:none; }
+    .editor-img-del { position:absolute; top:3px; right:3px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.65); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:0.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s; z-index:2; }
+    .editor-img-del:hover { background:var(--accent); border-color:var(--accent); }
+    .editor-img-cover { position:absolute; bottom:3px; left:3px; font-size:0.58rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; background:var(--accent); color:#fff; padding:0.1rem 0.4rem; border-radius:2px; pointer-events:none; }
+    .editor-img-num { position:absolute; bottom:3px; right:3px; font-size:0.65rem; color:rgba(255,255,255,0.5); pointer-events:none; font-weight:600; }
+    .btn-add-images { background:var(--bg3); border:1px dashed var(--border); border-radius:var(--radius); color:var(--muted); font-family:var(--font-body); font-size:0.82rem; padding:0.6rem 1.1rem; cursor:pointer; transition:border-color 0.15s,color 0.15s; }
+    .btn-add-images:hover { border-color:var(--white); color:var(--white); }
+
+    /* Editor footer */
+    .editor-footer { display:flex; align-items:center; justify-content:flex-end; gap:0.75rem; padding:1.25rem 1.75rem; border-top:1px solid var(--border); flex-wrap:wrap; }
+    .editor-save-msg { font-size:0.82rem; color:var(--muted); flex:1; }
+
+    /* Login modal */
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; display:none; align-items:center; justify-content:center; }
+    .modal-backdrop.open { display:flex; }
+    .modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; width:90%; max-width:400px; position:relative; }
+    .modal-title { font-family:var(--font-head); font-size:1.8rem; letter-spacing:0.05em; color:var(--white); margin-bottom:1.25rem; }
+    .modal-input { width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--font-body); font-size:1rem; padding:0.75rem 1rem; margin-bottom:0.75rem; display:block; }
+    .modal-input:focus { outline:none; border-color:var(--accent); }
+    .modal-error { color:var(--accent); font-size:0.85rem; min-height:1.2em; margin-bottom:0.5rem; }
+    .modal-close-x { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--muted); font-size:1.4rem; cursor:pointer; line-height:1; }
+
+    /* Misc */
+    .vak-empty { text-align:center; padding:5rem 0; color:var(--muted); font-style:italic; }
+    .vak-loading { text-align:center; padding:5rem 0; color:var(--muted); font-style:italic; }
+    @media(max-width:860px) { .detail-hero{height:240px;} }
+    @media(max-width:540px) { .vak-toolbar{flex-direction:column;align-items:flex-start;} }
+  </style>
+</head>
+<body>
+
+  <div id="site-header"></div>
+
+  <!-- ── Admin bar ── -->
+  <div class="admin-bar" id="admin-bar">
+    <button id="login-btn" class="btn-ghost" style="font-size:0.78rem;padding:0.35rem 1rem;">Admin login</button>
+  </div>
+
+  <!-- ── Page hero ── -->
+  <div class="page-hero">
+    <h1>Vakantie Blog</h1>
+    <p>Verhalen en foto's van onderweg.</p>
+  </div>
+
+  <!-- ── Filter toolbar ── -->
+  <div class="vak-toolbar" id="toolbar-wrap">
+    <div class="tag-filter-bar" id="tag-filter-bar">
+      <button class="tag-chip active" data-tag="">Alles</button>
+    </div>
+  </div>
+
+  <!-- ── Main content (list / detail) ── -->
+  <div class="vak-wrapper">
+
+    <!-- List view -->
+    <div id="list-view">
+      <div class="blog-grid" id="blog-grid">
+        <div class="vak-loading">Blogs laden…</div>
+      </div>
+      <!-- Admin-only drafts section -->
+      <div id="drafts-section" style="display:none;margin-top:3rem;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:1rem;">
+          <h2 style="font-family:var(--font-head);font-size:1.8rem;color:var(--muted);letter-spacing:0.06em;">Concepten</h2>
+          <span style="font-size:0.78rem;color:var(--muted);font-style:italic;">Alleen zichtbaar voor jou</span>
+        </div>
+        <div class="blog-grid" id="drafts-grid"></div>
+      </div>
+    </div>
+
+    <!-- Detail view -->
+    <div id="detail-view">
+      <span class="detail-back" id="detail-back">← Alle blogs</span>
+      <div id="detail-content"></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════ LIGHTBOX ══════════════ -->
+  <div class="lightbox" id="lightbox">
+    <button class="lb-close" id="lb-close">&#x2715;</button>
+    <div class="lb-img-wrap">
+      <button class="lb-arrow lb-prev" id="lb-prev">&#8249;</button>
+      <img class="lb-img" id="lb-img" src="" alt="" />
+      <button class="lb-arrow lb-next" id="lb-next">&#8250;</button>
+    </div>
+    <div class="lb-counter" id="lb-counter"></div>
+  </div>
+
+  <!-- ══════════════ EDITOR OVERLAY ══════════════ -->
+  <div class="editor-overlay" id="editor-overlay">
+    <div class="editor-panel">
+      <div class="editor-header">
+        <h2 id="editor-heading">Nieuw blog</h2>
+        <button class="editor-header-close" id="editor-close">&#x2715;</button>
+      </div>
+      <div class="editor-body">
+
+        <!-- Title -->
+        <div class="editor-field">
+          <label class="editor-label" for="ed-title">Titel *</label>
+          <input class="editor-input" type="text" id="ed-title" placeholder="Bijv. Italië 2024" maxlength="120" />
+        </div>
+
+        <!-- Story -->
+        <div class="editor-field">
+          <label class="editor-label" for="ed-story">Verhaal</label>
+          <textarea class="editor-textarea" id="ed-story" placeholder="Vertel over deze vakantie…" rows="10"></textarea>
+        </div>
+
+        <hr class="editor-divider" />
+
+        <!-- Tags -->
+        <div class="editor-field">
+          <label class="editor-label">Tags / vakantie</label>
+          <label style="font-size:0.8rem;color:var(--muted);margin-bottom:0.3rem;">Selecteer bestaande:</label>
+          <div class="tag-chips-row" id="ed-existing-tags">
+            <span style="color:var(--muted);font-size:0.82rem;font-style:italic;">Nog geen tags.</span>
+          </div>
+          <div class="new-tag-row">
+            <input class="new-tag-input" type="text" id="ed-new-tag" placeholder="Nieuwe tag…" maxlength="50" />
+            <button type="button" class="btn-add-tag" id="ed-add-tag-btn">+ Toevoegen</button>
+          </div>
+          <label style="font-size:0.8rem;color:var(--muted);margin-top:0.75rem;margin-bottom:0.3rem;display:block;">Geselecteerd:</label>
+          <div class="selected-tags-box" id="ed-selected-tags">
+            <span style="color:var(--muted);font-size:0.82rem;">Geen.</span>
+          </div>
+        </div>
+
+        <hr class="editor-divider" />
+
+        <!-- Visibility toggle -->
+        <div class="editor-field">
+          <label class="editor-label">Zichtbaarheid</label>
+          <div class="toggle-row">
+            <label class="toggle-switch">
+              <input type="checkbox" id="ed-published" />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label" id="ed-published-label">Concept — niet zichtbaar voor bezoekers</span>
+          </div>
+        </div>
+
+        <hr class="editor-divider" />
+
+        <!-- Images -->
+        <div class="editor-field">
+          <label class="editor-label">Afbeeldingen</label>
+          <p class="editor-img-hint">Sleep thumbnails om de volgorde te wijzigen. De eerste wordt de cover.</p>
+          <div class="editor-images-grid" id="ed-img-grid"></div>
+          <input type="file" id="ed-file-input" accept="image/*" multiple hidden />
+          <button type="button" class="btn-add-images" id="ed-add-img-btn">+ Foto's toevoegen</button>
+        </div>
+
+      </div>
+      <div class="editor-footer">
+        <span class="editor-save-msg" id="ed-save-msg"></span>
+        <button type="button" class="btn-ghost" id="ed-cancel-btn">Annuleren</button>
+        <button type="button" class="btn-primary" id="ed-save-btn" style="animation:none;">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ LOGIN MODAL ══════════════ -->
+  <div class="modal-backdrop" id="login-modal">
+    <div class="modal-box">
+      <button class="modal-close-x" id="login-close">&#x2715;</button>
+      <h2 class="modal-title">Admin login</h2>
+      <p class="modal-error" id="login-error"></p>
+      <form id="login-form">
+        <input class="modal-input" type="email"    id="login-email" placeholder="E-mailadres"  required autocomplete="email" />
+        <input class="modal-input" type="password" id="login-pass"  placeholder="Wachtwoord"   required autocomplete="current-password" />
+        <button type="submit" class="btn-primary" id="login-submit" style="width:100%;animation:none;">Inloggen</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════ JAVASCRIPT ══════════════ -->
+  <script>
+  (function () {
+    'use strict';
+
+    const { createClient } = window.supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    /* ── Helpers ─────────────────────────────────────────────────────────────── */
+    function esc(s) {
+      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function fmtDate(d) {
+      if (!d) return '';
+      return new Date(d).toLocaleDateString('nl-NL', { day:'numeric', month:'long', year:'numeric' });
+    }
+
+    /* ── State ───────────────────────────────────────────────────────────────── */
+    let allBlogs      = [];
+    let imgCache      = {};   // blogId → sorted images[]
+    let existingTags  = [];
+    let activeTag     = null;
+    let currentBlogId = null; // null = list, uuid = detail
+    let currentUser   = null;
+    let isAdmin       = false;
+
+    // Editor
+    let edBlogId      = null;   // null = new
+    let edImages      = [];     // {id,url,isNew,file}
+    let edDelImgIds   = [];     // {id,url} to delete on save
+    let edTags        = new Set();
+    let dragIdx       = null;
+
+    // Lightbox
+    let lbImages = [];
+    let lbIdx    = 0;
+
+    /* ── Auth ────────────────────────────────────────────────────────────────── */
+    sb.auth.onAuthStateChange((_e, session) => {
+      currentUser = session?.user ?? null;
+      isAdmin = !!(currentUser && currentUser.email === ADMIN_EMAIL);
+      renderAdminBar();
+      renderCurrentView();
+    });
+
+    function renderAdminBar() {
+      const bar = document.getElementById('admin-bar');
+      if (currentUser) {
+        bar.innerHTML = `
+          <span class="admin-bar-email">${esc(currentUser.email)}</span>
+          ${isAdmin ? '<button id="new-blog-btn" class="btn-primary" style="font-size:0.78rem;padding:0.35rem 1.1rem;animation:none;">+ Nieuw blog</button>' : ''}
+          <button id="logout-btn" class="btn-ghost" style="font-size:0.78rem;padding:0.35rem 1rem;">Uitloggen</button>`;
+        document.getElementById('logout-btn').addEventListener('click', () => sb.auth.signOut());
+        if (isAdmin) {
+          document.getElementById('new-blog-btn').addEventListener('click', () => openEditor(null));
+        }
+      } else {
+        bar.innerHTML = '<button id="login-btn" class="btn-ghost" style="font-size:0.78rem;padding:0.35rem 1rem;">Admin login</button>';
+        document.getElementById('login-btn').addEventListener('click', () => document.getElementById('login-modal').classList.add('open'));
+      }
+    }
+
+    /* ── Login modal ─────────────────────────────────────────────────────────── */
+    document.getElementById('login-close').addEventListener('click', () => document.getElementById('login-modal').classList.remove('open'));
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const errEl = document.getElementById('login-error');
+      const btn   = document.getElementById('login-submit');
+      btn.textContent = 'Inloggen…'; btn.disabled = true; errEl.textContent = '';
+      const { error } = await sb.auth.signInWithPassword({
+        email: document.getElementById('login-email').value,
+        password: document.getElementById('login-pass').value,
+      });
+      if (error) {
+        errEl.textContent = 'Onjuist e-mailadres of wachtwoord.';
+      } else {
+        document.getElementById('login-modal').classList.remove('open');
+        this.reset();
+      }
+      btn.textContent = 'Inloggen'; btn.disabled = false;
+    });
+
+    /* ── Load data ───────────────────────────────────────────────────────────── */
+    async function loadBlogs() {
+      const { data, error } = await sb.from('blogs').select('*').order('created_at', { ascending: false });
+      if (error) {
+        document.getElementById('blog-grid').innerHTML = `<div class="vak-empty">Kon blogs niet laden: ${esc(error.message)}</div>`;
+        return;
+      }
+      allBlogs     = data || [];
+      existingTags = [...new Set(allBlogs.flatMap(b => b.tags || []))].sort();
+      renderTagBar();
+      renderCurrentView();
+    }
+
+    async function loadImages(blogId) {
+      if (imgCache[blogId]) return imgCache[blogId];
+      const { data } = await sb.from('blog_images').select('*').eq('blog_id', blogId).order('sort_order');
+      imgCache[blogId] = data || [];
+      return imgCache[blogId];
+    }
+
+    /* ── Tag filter bar ──────────────────────────────────────────────────────── */
+    function renderTagBar() {
+      const bar = document.getElementById('tag-filter-bar');
+      bar.innerHTML = [
+        `<button class="tag-chip ${!activeTag ? 'active' : ''}" data-tag="">Alles</button>`,
+        ...existingTags.map(t => `<button class="tag-chip ${activeTag===t?'active':''}" data-tag="${esc(t)}">${esc(t)}</button>`),
+      ].join('');
+      bar.querySelectorAll('.tag-chip').forEach(c => {
+        c.addEventListener('click', () => { activeTag = c.dataset.tag || null; renderTagBar(); renderListView(); });
+      });
+    }
+
+    /* ── Routing (hash) ──────────────────────────────────────────────────────── */
+    function renderCurrentView() {
+      const hash = window.location.hash.slice(1);
+      if (hash && hash.startsWith('blog-')) {
+        const id = hash.slice(5);
+        showDetail(id);
+      } else {
+        showList();
+      }
+    }
+
+    window.addEventListener('hashchange', renderCurrentView);
+
+    function showList() {
+      currentBlogId = null;
+      document.getElementById('list-view').style.display   = '';
+      document.getElementById('detail-view').style.display = 'none';
+      document.getElementById('toolbar-wrap').style.display = '';
+      renderListView();
+    }
+
+    async function showDetail(id) {
+      currentBlogId = id;
+      document.getElementById('list-view').style.display   = 'none';
+      document.getElementById('detail-view').style.display = 'block';
+      document.getElementById('toolbar-wrap').style.display = 'none';
+      await renderDetailView(id);
+    }
+
+    document.getElementById('detail-back').addEventListener('click', () => {
+      history.pushState(null, '', window.location.pathname);
+      showList();
+    });
+
+    /* ── List view ───────────────────────────────────────────────────────────── */
+    function renderListView() {
+      const base = activeTag ? allBlogs.filter(b => (b.tags || []).includes(activeTag)) : [...allBlogs];
+      const published = base.filter(b => b.published);
+      const drafts    = isAdmin ? base.filter(b => !b.published) : [];
+
+      renderBlogGrid(document.getElementById('blog-grid'), published, false);
+
+      // Drafts section (admin only)
+      const draftsSection = document.getElementById('drafts-section');
+      if (isAdmin && drafts.length > 0) {
+        draftsSection.style.display = 'block';
+        renderBlogGrid(document.getElementById('drafts-grid'), drafts, true);
+      } else {
+        draftsSection.style.display = 'none';
+      }
+    }
+
+    function renderBlogGrid(grid, blogs, isDraftSection) {
+      if (blogs.length === 0) {
+        grid.innerHTML = isDraftSection
+          ? ''
+          : '<div class="vak-empty">Geen gepubliceerde blogs gevonden.</div>';
+        return;
+      }
+
+      grid.innerHTML = blogs.map(b => {
+        const tags     = (b.tags || []).map(t => `<span class="blog-tag-pill">${esc(t)}</span>`).join('');
+        const cover    = imgCache[b.id]?.[0]?.url;
+        const imgStyle = cover ? `background-image:url('${esc(cover)}')` : '';
+        const excerpt  = ((b.story || '').replace(/\n/g, ' ').slice(0, 160) + ((b.story || '').length > 160 ? '…' : '')).trim();
+        const adminBtns = isAdmin ? `
+          <div class="blog-card-admin">
+            <button class="btn-edit" data-id="${esc(b.id)}">Bewerken</button>
+            <button class="btn-del-card" data-id="${esc(b.id)}">Verwijder</button>
+          </div>` : '';
+        const opacity = isDraftSection ? 'opacity:0.7;' : '';
+        return `
+          <div class="blog-card" data-id="${esc(b.id)}" style="${opacity}">
+            ${adminBtns}
+            <div class="blog-card-cover" style="${imgStyle}"></div>
+            <div class="blog-card-body">
+              <div class="blog-card-tags">${tags}</div>
+              <div class="blog-card-title">${esc(b.title)}</div>
+              ${excerpt ? `<div class="blog-card-excerpt">${esc(excerpt)}</div>` : ''}
+              <div class="blog-card-date">${fmtDate(b.created_at)}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      // Click → detail
+      grid.querySelectorAll('.blog-card').forEach(card => {
+        card.addEventListener('click', e => {
+          if (e.target.closest('.btn-edit') || e.target.closest('.btn-del-card')) return;
+          window.location.hash = 'blog-' + card.dataset.id;
+        });
+      });
+
+      if (isAdmin) {
+        grid.querySelectorAll('.btn-edit').forEach(btn => {
+          btn.addEventListener('click', () => openEditor(btn.dataset.id));
+        });
+        grid.querySelectorAll('.btn-del-card').forEach(btn => {
+          btn.addEventListener('click', () => deleteBlog(btn.dataset.id));
+        });
+      }
+
+      // Load missing cover images
+      blogs.forEach(async b => {
+        if (!imgCache[b.id]) {
+          const imgs = await loadImages(b.id);
+          if (imgs.length > 0) {
+            const el = grid.querySelector(`.blog-card[data-id="${b.id}"] .blog-card-cover`);
+            if (el) el.style.backgroundImage = `url('${esc(imgs[0].url)}')`;
+          }
+        }
+      });
+    }
+
+    /* ── Delete blog ─────────────────────────────────────────────────────────── */
+    async function deleteBlog(id) {
+      if (!confirm('Dit blog en alle bijbehorende afbeeldingen permanent verwijderen?')) return;
+      // Delete storage files first
+      const imgs = await loadImages(id);
+      for (const img of imgs) {
+        const m = img.url.match(/\/blog-images\/(.+)$/);
+        if (m) await sb.storage.from('blog-images').remove([decodeURIComponent(m[1])]);
+      }
+      const { error } = await sb.from('blogs').delete().eq('id', id);
+      if (error) { alert('Verwijderen mislukt: ' + error.message); return; }
+      delete imgCache[id];
+      await loadBlogs();
+    }
+
+    /* ── Detail view ─────────────────────────────────────────────────────────── */
+    async function renderDetailView(id) {
+      const container = document.getElementById('detail-content');
+      container.innerHTML = '<div class="vak-loading">Laden…</div>';
+      const blog = allBlogs.find(b => b.id === id);
+      if (!blog) { container.innerHTML = '<div class="vak-empty">Blog niet gevonden.</div>'; return; }
+      const images = await loadImages(id);
+      const coverUrl = images[0]?.url;
+      const tags = (blog.tags || []).map(t => `<span class="blog-tag-pill">${esc(t)}</span>`).join('');
+      const adminRow = isAdmin ? `
+        <div class="detail-admin-row">
+          <button class="btn-primary" id="detail-edit-btn" style="animation:none;">Bewerken</button>
+          <button class="btn-ghost" id="detail-del-btn">Verwijderen</button>
+          <span style="font-size:0.82rem;color:${blog.published ? '#22c55e' : 'var(--accent2)'};">
+            ${blog.published ? 'Gepubliceerd' : 'Concept'}
+          </span>
+        </div>` : '';
+
+      const imgGrid = images.length > 1 ? `
+        <div class="detail-images-title">Foto's</div>
+        <div class="detail-img-grid" id="detail-img-grid">
+          ${images.map((img, i) => `
+            <div class="detail-img-card" data-index="${i}">
+              <img src="${esc(img.url)}" alt="" loading="lazy" />
+            </div>`).join('')}
+        </div>` : '';
+
+      container.innerHTML = `
+        ${coverUrl ? `<div class="detail-hero" style="background-image:url('${esc(coverUrl)}')"></div>` : ''}
+        <div class="detail-meta">${tags}</div>
+        <h1 class="detail-title">${esc(blog.title)}</h1>
+        <div class="detail-date">${fmtDate(blog.created_at)}</div>
+        ${adminRow}
+        ${blog.story ? `<div class="detail-story">${esc(blog.story)}</div>` : ''}
+        ${imgGrid}`;
+
+      if (isAdmin) {
+        document.getElementById('detail-edit-btn').addEventListener('click', () => openEditor(id));
+        document.getElementById('detail-del-btn').addEventListener('click', async () => {
+          await deleteBlog(id); history.pushState(null, '', window.location.pathname); showList();
+        });
+      }
+
+      if (images.length > 1) {
+        container.querySelectorAll('.detail-img-card').forEach(card => {
+          card.addEventListener('click', () => openLightbox(images, parseInt(card.dataset.index)));
+        });
+      }
+    }
+
+    /* ── Lightbox ────────────────────────────────────────────────────────────── */
+    function openLightbox(images, idx) {
+      lbImages = images; lbIdx = idx;
+      renderLightbox();
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function renderLightbox() {
+      document.getElementById('lb-img').src = lbImages[lbIdx].url;
+      document.getElementById('lb-counter').textContent = `${lbIdx + 1} / ${lbImages.length}`;
+      document.getElementById('lb-prev').disabled = lbIdx === 0;
+      document.getElementById('lb-next').disabled = lbIdx === lbImages.length - 1;
+    }
+    document.getElementById('lb-close').addEventListener('click', closeLightbox);
+    document.getElementById('lightbox').addEventListener('click', e => { if (e.target.id === 'lightbox') closeLightbox(); });
+    document.getElementById('lb-prev').addEventListener('click', () => { if (lbIdx > 0) { lbIdx--; renderLightbox(); } });
+    document.getElementById('lb-next').addEventListener('click', () => { if (lbIdx < lbImages.length - 1) { lbIdx++; renderLightbox(); } });
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape')     closeLightbox();
+      if (e.key === 'ArrowLeft')  { if (lbIdx > 0) { lbIdx--; renderLightbox(); } }
+      if (e.key === 'ArrowRight') { if (lbIdx < lbImages.length-1) { lbIdx++; renderLightbox(); } }
+    });
+
+    /* ── Editor ──────────────────────────────────────────────────────────────── */
+    function openEditor(blogId) {
+      edBlogId    = blogId;
+      edImages    = [];
+      edDelImgIds = [];
+      edTags      = new Set();
+      document.getElementById('ed-save-msg').textContent = '';
+      document.getElementById('ed-save-btn').disabled    = false;
+      document.getElementById('ed-save-btn').textContent = 'Opslaan';
+
+      const blog = blogId ? allBlogs.find(b => b.id === blogId) : null;
+      document.getElementById('editor-heading').textContent = blog ? 'Blog bewerken' : 'Nieuw blog';
+      document.getElementById('ed-title').value  = blog?.title  || '';
+      document.getElementById('ed-story').value  = blog?.story  || '';
+      document.getElementById('ed-published').checked = blog?.published || false;
+      updatePublishedLabel();
+
+      if (blog?.tags) blog.tags.forEach(t => edTags.add(t));
+
+      renderEdExistingTags();
+      renderEdSelectedTags();
+
+      // Load existing images
+      if (blogId && imgCache[blogId]) {
+        edImages = imgCache[blogId].map(img => ({ id: img.id, url: img.url, isNew: false, file: null }));
+        renderEdImages();
+      } else if (blogId) {
+        loadImages(blogId).then(imgs => {
+          edImages = imgs.map(img => ({ id: img.id, url: img.url, isNew: false, file: null }));
+          renderEdImages();
+        });
+      } else {
+        renderEdImages();
+      }
+
+      document.getElementById('editor-overlay').classList.add('open');
+    }
+
+    function closeEditor() {
+      document.getElementById('editor-overlay').classList.remove('open');
+      edImages.filter(i => i.isNew).forEach(i => URL.revokeObjectURL(i.url));
+    }
+
+    document.getElementById('editor-close').addEventListener('click', closeEditor);
+    document.getElementById('ed-cancel-btn').addEventListener('click', closeEditor);
+
+    // Published toggle
+    document.getElementById('ed-published').addEventListener('change', updatePublishedLabel);
+    function updatePublishedLabel() {
+      const checked = document.getElementById('ed-published').checked;
+      const lbl = document.getElementById('ed-published-label');
+      lbl.textContent = checked ? 'Gepubliceerd — zichtbaar voor iedereen' : 'Concept — niet zichtbaar voor bezoekers';
+      lbl.className = 'toggle-label' + (checked ? ' published' : '');
+    }
+
+    // File picker
+    document.getElementById('ed-add-img-btn').addEventListener('click', () => document.getElementById('ed-file-input').click());
+    document.getElementById('ed-file-input').addEventListener('change', function () {
+      [...this.files].forEach(file => {
+        edImages.push({ id: null, url: URL.createObjectURL(file), isNew: true, file });
+      });
+      this.value = '';
+      renderEdImages();
+    });
+
+    /* ── Editor tags ── */
+    function renderEdExistingTags() {
+      const c = document.getElementById('ed-existing-tags');
+      if (existingTags.length === 0) {
+        c.innerHTML = '<span style="color:var(--muted);font-size:0.82rem;font-style:italic;">Nog geen bestaande tags.</span>';
+        return;
+      }
+      c.innerHTML = existingTags.map(t =>
+        `<button type="button" class="tag-chip ed-ex-tag ${edTags.has(t)?'active':''}" data-tag="${esc(t)}">${esc(t)}</button>`
+      ).join('');
+      c.querySelectorAll('.ed-ex-tag').forEach(chip => {
+        chip.addEventListener('click', () => {
+          edTags.has(chip.dataset.tag) ? edTags.delete(chip.dataset.tag) : edTags.add(chip.dataset.tag);
+          renderEdExistingTags();
+          renderEdSelectedTags();
+        });
+      });
+    }
+
+    function renderEdSelectedTags() {
+      const c = document.getElementById('ed-selected-tags');
+      if (edTags.size === 0) {
+        c.innerHTML = '<span style="color:var(--muted);font-size:0.82rem;">Geen.</span>';
+        return;
+      }
+      c.innerHTML = [...edTags].map(t =>
+        `<button type="button" class="tag-chip active ed-rm-tag" data-tag="${esc(t)}" style="margin:2px;">${esc(t)} &times;</button>`
+      ).join('');
+      c.querySelectorAll('.ed-rm-tag').forEach(btn => {
+        btn.addEventListener('click', () => { edTags.delete(btn.dataset.tag); renderEdExistingTags(); renderEdSelectedTags(); });
+      });
+    }
+
+    function addEdTag() {
+      const inp = document.getElementById('ed-new-tag');
+      const tag = inp.value.trim();
+      if (!tag) return;
+      edTags.add(tag);
+      if (!existingTags.includes(tag)) { existingTags.push(tag); existingTags.sort(); }
+      inp.value = '';
+      renderEdExistingTags();
+      renderEdSelectedTags();
+    }
+    document.getElementById('ed-add-tag-btn').addEventListener('click', addEdTag);
+    document.getElementById('ed-new-tag').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addEdTag(); } });
+
+    /* ── Editor images + drag ── */
+    function renderEdImages() {
+      const grid = document.getElementById('ed-img-grid');
+      if (edImages.length === 0) {
+        grid.innerHTML = '';
+        return;
+      }
+      grid.innerHTML = edImages.map((img, i) => `
+        <div class="editor-img-item" data-index="${i}" draggable="true">
+          <div class="editor-img-thumb" style="background-image:url('${esc(img.url)}')"></div>
+          <button type="button" class="editor-img-del" data-index="${i}" title="Verwijder">&#x2715;</button>
+          ${i === 0 ? '<span class="editor-img-cover">Cover</span>' : ''}
+          <span class="editor-img-num">${i + 1}</span>
+        </div>`).join('');
+
+      grid.querySelectorAll('.editor-img-item').forEach(el => {
+        el.addEventListener('dragstart', e => { dragIdx = parseInt(el.dataset.index); e.dataTransfer.effectAllowed = 'move'; el.classList.add('dragging'); });
+        el.addEventListener('dragend',   () => { el.classList.remove('dragging'); grid.querySelectorAll('.editor-img-item').forEach(x => x.classList.remove('drag-over')); dragIdx = null; });
+        el.addEventListener('dragover',  e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; el.classList.add('drag-over'); });
+        el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+        el.addEventListener('drop', e => {
+          e.preventDefault();
+          el.classList.remove('drag-over');
+          const dropIdx = parseInt(el.dataset.index);
+          if (dragIdx === null || dragIdx === dropIdx) return;
+          const [item] = edImages.splice(dragIdx, 1);
+          edImages.splice(dropIdx, 0, item);
+          dragIdx = null;
+          renderEdImages();
+        });
+      });
+      grid.querySelectorAll('.editor-img-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.dataset.index);
+          const img = edImages[i];
+          if (img.id) edDelImgIds.push({ id: img.id, url: img.url });
+          if (img.isNew) URL.revokeObjectURL(img.url);
+          edImages.splice(i, 1);
+          renderEdImages();
+        });
+      });
+    }
+
+    /* ── Save editor ─────────────────────────────────────────────────────────── */
+    document.getElementById('ed-save-btn').addEventListener('click', saveEditor);
+
+    async function saveEditor() {
+      const title = document.getElementById('ed-title').value.trim();
+      if (!title) { alert('Geef het blog een titel.'); return; }
+
+      const btn   = document.getElementById('ed-save-btn');
+      const msgEl = document.getElementById('ed-save-msg');
+      btn.disabled = true;
+      msgEl.style.color = 'var(--muted)';
+
+      try {
+        const blogData = {
+          title,
+          story:     document.getElementById('ed-story').value,
+          tags:      [...edTags],
+          published: document.getElementById('ed-published').checked,
+          updated_at: new Date().toISOString(),
+        };
+
+        let blogId = edBlogId;
+
+        if (blogId) {
+          const { error } = await sb.from('blogs').update(blogData).eq('id', blogId);
+          if (error) throw error;
+        } else {
+          const { data, error } = await sb.from('blogs').insert([blogData]).select().single();
+          if (error) throw error;
+          blogId = data.id;
+        }
+
+        // Delete removed images
+        for (const { id, url } of edDelImgIds) {
+          const m = url.match(/\/blog-images\/(.+)$/);
+          if (m) await sb.storage.from('blog-images').remove([decodeURIComponent(m[1])]);
+          await sb.from('blog_images').delete().eq('id', id);
+        }
+
+        // Upload new images + update sort_order for all
+        const newImgs = edImages.filter(i => i.isNew);
+        let uploaded = 0;
+
+        for (let i = 0; i < edImages.length; i++) {
+          const img = edImages[i];
+          if (img.isNew && img.file) {
+            msgEl.textContent = `Uploaden ${++uploaded} / ${newImgs.length}…`;
+            const ext  = img.file.name.split('.').pop().toLowerCase();
+            const path = `${blogId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+            const { data: sd, error: se } = await sb.storage.from('blog-images').upload(path, img.file, { cacheControl:'3600' });
+            if (se) throw se;
+            const url = sb.storage.from('blog-images').getPublicUrl(sd.path).data.publicUrl;
+            const { data: rd, error: re } = await sb.from('blog_images').insert([{ blog_id:blogId, url, sort_order:i }]).select().single();
+            if (re) throw re;
+            img.url = url; img.isNew = false; img.id = rd.id;
+          } else if (!img.isNew && img.id) {
+            await sb.from('blog_images').update({ sort_order: i }).eq('id', img.id);
+          }
+        }
+
+        // Refresh cache
+        delete imgCache[blogId];
+        await loadImages(blogId);
+
+        msgEl.textContent = '';
+        closeEditor();
+        await loadBlogs();
+
+        // Stay in detail view if we were editing
+        if (edBlogId) {
+          window.location.hash = 'blog-' + blogId;
+          await showDetail(blogId);
+        }
+
+      } catch (err) {
+        console.error(err);
+        msgEl.style.color = 'var(--accent)';
+        msgEl.textContent = 'Opslaan mislukt: ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Opslaan';
+      }
+    }
+
+    /* ── Init ────────────────────────────────────────────────────────────────── */
+    loadBlogs();
+
+  })();
+  </script>
+
+  <div id="site-footer"></div>
+
+<script src="../sections-layout.js"></script>
+</body>
+</html>
