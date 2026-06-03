@@ -87,4 +87,9 @@
   const footerEl = document.getElementById('site-footer');
   if (headerEl) headerEl.outerHTML = buildHeader();
   if (footerEl) footerEl.outerHTML = buildFooter(footerEl);
+
+  /* ── Inject Visual FX ──────────────────────────────────────────────────── */
+  const fxScript = document.createElement('script');
+  fxScript.src = '../visual-fx.js';
+  document.body.appendChild(fxScript);
 })();

@@ -26,7 +26,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  background: var(--bg);
+  background: transparent; /* Changed from var(--bg) to allow Vanta background to show */
   color: var(--text);
   font-family: var(--font-body);
   font-weight: 300;
@@ -664,3 +664,60 @@ footer p { font-size: 0.85rem; color: var(--muted); }
   nav a { font-size: 0.73rem; }
   .review-specs { grid-template-columns: 1fr; }
 }
+
+/* ── Visual Overhaul (Vanta, GSAP, Interactions) ── */
+
+#vanta-bg {
+  position: fixed;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none; /* Let clicks pass through to elements */
+}
+
+#page-transition-overlay {
+  position: fixed;
+  top: 100%;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* Semi-transparent backgrounds for sections so Vanta shines through */
+header, .subnav-bar {
+  background: rgba(14,14,14,0.85);
+  backdrop-filter: blur(12px);
+}
+
+.hero-bg {
+  background:
+    radial-gradient(ellipse at 60% 40%, rgba(230,59,46,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(245,166,35,0.07) 0%, transparent 50%);
+}
+
+.section-card, .card, .review-card, .emp-card, .spotlight, .page-hero, footer {
+  background: rgba(22,22,22,0.65) !important;
+  backdrop-filter: blur(10px);
+}
+
+.review-specs, .news-row-thumb {
+  background: rgba(31,31,31,0.5) !important;
+}
+
+/* Button press animations */
+.btn-primary:active, .btn-ghost:active, .section-card:active, .card:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.1s;
+}
+
+/* GSAP utility classes */
+.gsap-fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
