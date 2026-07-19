@@ -1,0 +1,344 @@
+<!-- Experience / Timeline (Three.js animated) -->
+  <section class="resume-section" id="experience">
+    <div class="timeline-header-wrap gsap-fade-up">
+      <h2>Experience & Education</h2>
+      <div class="style-switcher">
+        <button class="btn-style active" data-style="1">Linear</button>
+        <button class="btn-style" data-style="2">Isometric</button>
+        <button class="btn-style" data-style="3">Cosmos</button>
+        <button class="btn-style" data-style="4">Helix</button>
+      </div>
+    </div>
+    <div id="timeline-3d-container" class="gsap-fade-up">
+      <div id="timeline-labels"></div>
+      <div class="timeline-overlay-text" id="timeline-default-text" style="top:20px; left:20px; transform:none; text-align:left;">
+        <h3 style="font-size:1.5rem; color:var(--muted);">Career Journey</h3>
+        <p style="font-size:0.85rem;">Hover or click nodes for details</p>
+      </div>
+      <div id="timeline-info-panel" style="display:none; position:absolute; top:20px; right:20px; width:280px; background:rgba(22,22,22,0.85); backdrop-filter:blur(10px); border:1px solid var(--accent); border-radius:var(--radius); padding:1.5rem; pointer-events:none; transition: opacity 0.2s; z-index:10; text-align:left;">
+        <div style="font-size:0.75rem; color:var(--accent); letter-spacing:0.1em; margin-bottom:0.5rem;" id="tl-date"></div>
+        <h4 style="color:var(--white); font-family:var(--font-head); font-size:1.4rem; margin-bottom:0.5rem;" id="tl-title"></h4>
+        <p style="color:var(--muted); font-size:0.85rem; line-height:1.6;" id="tl-desc"></p>
+        <div style="font-size:0.7rem; color:#555; margin-top:1rem; font-style:italic;" id="tl-hint">Click for full info</div>
+      </div>
+    </div>
+  </section>
+
+<script>
+  // ── Three.js Timeline ──
+  const container = document.getElementById('timeline-3d-container');
+  const labelsContainer = document.getElementById('timeline-labels');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.appendChild(renderer.domElement);
+
+  // Note: Data is ordered from Old to New (Left to Right)
+  const timelineData = [
+    { title: "High School", date: "Sep 2011 - Jun 2015", short: "Quis nostrud exercitation.", full: "Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
+    { title: "University", date: "Sep 2015 - Dec 2018", short: "Magna aliqua enim ad.", full: "Magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip." },
+    { title: "Intern", date: "Jan 2019 - May 2019", short: "Ut labore et dolore.", full: "Ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident." },
+    { title: "Junior Developer", date: "Jun 2019 - Feb 2021", short: "Sed do eiusmod tempor.", full: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor." },
+    { title: "Software Engineer", date: "Mar 2021 - Dec 2023", short: "Consectetur adipiscing elit.", full: "Consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." },
+    { title: "Senior Developer", date: "Jan 2024 - Present", short: "Lorem ipsum dolor sit amet.", full: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore." }
+  ];
+
+  let currentStyle = 1; // Default to Linear
+  let meshes = [];
+  let interactables = [];
+  let htmlLabels = [];
+  let timelineLine = null;
+  let points = [];
+
+  const coreMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+  const wireMat = new THREE.MeshBasicMaterial({ color: 0xe63b2e, wireframe: true });
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x444444, transparent: true, opacity: 0.5 });
+  
+  // Diverse geometries for Style 2 (Isometric objects)
+  const geometries = [
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.ConeGeometry(0.6, 1.2, 4),
+    new THREE.CylinderGeometry(0.5, 0.5, 1.2, 8),
+    new THREE.TorusGeometry(0.5, 0.2, 8, 16),
+    new THREE.TetrahedronGeometry(0.8),
+    new THREE.DodecahedronGeometry(0.6)
+  ];
+
+  function createScene() {
+    // Cleanup old scene objects
+    meshes.forEach(m => scene.remove(m.group));
+    if (timelineLine) scene.remove(timelineLine);
+    labelsContainer.innerHTML = '';
+    meshes = [];
+    interactables = [];
+    htmlLabels = [];
+    points = [];
+
+    const nodes = timelineData.length;
+
+    for (let i = 0; i < nodes; i++) {
+      const meshGroup = new THREE.Group();
+      let wireGeo, coreGeo;
+
+      if (currentStyle === 2) {
+        // Isometric uses varied geometries
+        wireGeo = geometries[i % geometries.length];
+        coreGeo = wireGeo;
+      } else {
+        // Default Icosahedron
+        wireGeo = new THREE.IcosahedronGeometry(0.6, 0);
+        coreGeo = wireGeo;
+      }
+
+      const wire = new THREE.Mesh(wireGeo, wireMat.clone());
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      core.scale.set(0.95, 0.95, 0.95);
+      
+      const hitGeo = new THREE.SphereGeometry(1.2, 16, 16);
+      const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+      const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+      hitMesh.userData = { ...timelineData[i], index: i };
+
+      meshGroup.add(wire);
+      meshGroup.add(core);
+      meshGroup.add(hitMesh);
+
+      // Positioning logic based on style
+      let yOffset = 0; // For HTML labels
+      if (currentStyle === 1) {
+        // Linear Alternate (Style 1)
+        meshGroup.position.x = (i - (nodes-1)/2) * 2.5;
+        meshGroup.position.y = 0;
+        meshGroup.position.z = 0;
+        yOffset = (i % 2 === 0) ? 1.0 : -1.0;
+      } 
+      else if (currentStyle === 2) {
+        // Isometric Winding Path (Style 2)
+        meshGroup.position.x = (i - (nodes-1)/2) * 2.0;
+        meshGroup.position.y = 0;
+        meshGroup.position.z = Math.sin(i * 1.5) * 2;
+        yOffset = 1.0;
+      } 
+      else if (currentStyle === 3) {
+        // Cosmos Floating (Style 3)
+        meshGroup.position.x = (i - (nodes-1)/2) * 2.5;
+        meshGroup.position.y = Math.sin(i * 1.5) * 1.2;
+        meshGroup.position.z = Math.cos(i * 1.5) * 1.2;
+        yOffset = 1.2;
+      } 
+      else if (currentStyle === 4) {
+        // Vertical Helix (Style 4)
+        meshGroup.position.x = Math.cos(i * 2.0) * 2.5;
+        meshGroup.position.y = (i - (nodes-1)/2) * 1.5;
+        meshGroup.position.z = Math.sin(i * 2.0) * 2.5;
+        yOffset = 1.0;
+      }
+
+      scene.add(meshGroup);
+      meshes.push({ group: meshGroup, wire: wire, core: core });
+      interactables.push(hitMesh);
+      points.push(meshGroup.position);
+
+      // Create persistent HTML label
+      const labelDiv = document.createElement('div');
+      labelDiv.className = 'tl-label';
+      labelDiv.innerHTML = `
+        <div class="tl-label-title">${timelineData[i].title}</div>
+        <div class="tl-label-date">${timelineData[i].date}</div>
+      `;
+      // Store local offset to keep it correctly positioned above/below the 3d node
+      labelDiv.dataset.yOffset = yOffset;
+      labelsContainer.appendChild(labelDiv);
+      htmlLabels.push(labelDiv);
+    }
+
+    // Connect points with a line
+    let curvePoints = [];
+    if (currentStyle === 1) {
+      curvePoints = points; 
+    } else {
+      const curve = new THREE.CatmullRomCurve3(points);
+      curvePoints = curve.getPoints(nodes * 10);
+    }
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(curvePoints);
+    timelineLine = new THREE.Line(lineGeo, lineMat);
+    scene.add(timelineLine);
+
+    // Setup Camera
+    if (currentStyle === 2) {
+      // Isometric view
+      camera.position.set(5, 5, 5);
+      camera.lookAt(0, 0, 0);
+    } else if (currentStyle === 4) {
+      // Helix view
+      camera.position.set(0, 0, 10);
+      camera.lookAt(0, 0, 0);
+    } else {
+      // Standard view
+      camera.position.set(0, 0, 8);
+      camera.lookAt(0, 0, 0);
+    }
+  }
+
+  createScene();
+
+  // Raycaster & Interaction
+  let mouseX = 0;
+  let mouseY = 0;
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+
+  const infoPanel = document.getElementById('timeline-info-panel');
+  const defaultText = document.getElementById('timeline-default-text');
+  const tlDate = document.getElementById('tl-date');
+  const tlTitle = document.getElementById('tl-title');
+  const tlDesc = document.getElementById('tl-desc');
+  const tlHint = document.getElementById('tl-hint');
+  
+  let hoveredNode = null;
+  let clickedNode = null;
+
+  container.addEventListener('mousemove', (e) => {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    pointer.x = (x / container.clientWidth) * 2 - 1;
+    pointer.y = -(y / container.clientHeight) * 2 + 1;
+    
+    mouseX = pointer.x;
+    mouseY = pointer.y;
+
+    raycaster.setFromCamera(pointer, camera);
+    const intersects = raycaster.intersectObjects(interactables);
+    
+    if (intersects.length > 0) {
+      document.body.style.cursor = 'pointer';
+      const hit = intersects[0].object;
+      
+      if (hoveredNode !== hit && clickedNode !== hit) {
+        hoveredNode = hit;
+        meshes[hit.userData.index].wire.material.color.setHex(0xffffff);
+        gsap.to(meshes[hit.userData.index].group.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.3 });
+        if (!clickedNode) updateInfoPanel(hit.userData, false);
+      }
+    } else {
+      document.body.style.cursor = 'default';
+      if (hoveredNode && hoveredNode !== clickedNode) {
+        meshes[hoveredNode.userData.index].wire.material.color.setHex(0xe63b2e);
+        gsap.to(meshes[hoveredNode.userData.index].group.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+        hoveredNode = null;
+        if (!clickedNode) {
+          infoPanel.style.display = 'none';
+          defaultText.style.display = 'block';
+        }
+      }
+    }
+  });
+
+  container.addEventListener('click', () => {
+    if (hoveredNode) {
+      if (clickedNode && clickedNode !== hoveredNode) {
+        meshes[clickedNode.userData.index].wire.material.color.setHex(0xe63b2e);
+        gsap.to(meshes[clickedNode.userData.index].group.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+      }
+      clickedNode = hoveredNode;
+      updateInfoPanel(clickedNode.userData, true);
+    } else {
+      if (clickedNode) {
+        meshes[clickedNode.userData.index].wire.material.color.setHex(0xe63b2e);
+        gsap.to(meshes[clickedNode.userData.index].group.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+        clickedNode = null;
+        infoPanel.style.display = 'none';
+        defaultText.style.display = 'block';
+      }
+    }
+  });
+
+  function updateInfoPanel(data, isExpanded) {
+    defaultText.style.display = 'none';
+    infoPanel.style.display = 'block';
+    tlDate.textContent = data.date;
+    tlTitle.textContent = data.title;
+    tlDesc.textContent = isExpanded ? data.full : data.short;
+    tlHint.style.display = isExpanded ? 'none' : 'block';
+    infoPanel.style.borderColor = isExpanded ? '#ffffff' : 'var(--accent)';
+  }
+
+  // Switcher Logic
+  const styleBtns = document.querySelectorAll('.btn-style');
+  styleBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      styleBtns.forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentStyle = parseInt(e.target.dataset.style);
+      
+      // Reset interaction state
+      clickedNode = null;
+      hoveredNode = null;
+      infoPanel.style.display = 'none';
+      defaultText.style.display = 'block';
+      scene.rotation.set(0,0,0);
+      
+      createScene();
+    });
+  });
+
+  // Animation Loop
+  function animate() {
+    requestAnimationFrame(animate);
+    
+    meshes.forEach((meshObj, i) => {
+      meshObj.group.rotation.x += 0.005;
+      meshObj.group.rotation.y += 0.01;
+    });
+
+    if (currentStyle === 3) {
+      scene.position.y = Math.sin(Date.now() * 0.001) * 0.2;
+      scene.rotation.y += (mouseX * 0.3 - scene.rotation.y) * 0.05;
+      scene.rotation.x += (mouseY * 0.3 - scene.rotation.x) * 0.05;
+    } else if (currentStyle === 4) {
+      scene.rotation.y += 0.002;
+    } else {
+      scene.position.y = 0;
+      scene.rotation.x = 0;
+      scene.rotation.y = 0;
+    }
+
+    renderer.render(scene, camera);
+
+    // Update persistent HTML labels positions relative to 3D points
+    const halfWidth = container.clientWidth / 2;
+    const halfHeight = container.clientHeight / 2;
+
+    meshes.forEach((meshObj, i) => {
+      // Create a dummy vector with the label's spatial offset
+      const offsetPos = meshObj.group.position.clone();
+      offsetPos.y += parseFloat(htmlLabels[i].dataset.yOffset);
+      
+      // Project to 2D screen space
+      offsetPos.applyMatrix4(scene.matrixWorld);
+      offsetPos.project(camera);
+
+      const x = (offsetPos.x * halfWidth) + halfWidth;
+      const y = -(offsetPos.y * halfHeight) + halfHeight;
+
+      htmlLabels[i].style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+      
+      // Hide labels if they go behind camera plane
+      if (offsetPos.z > 1) {
+        htmlLabels[i].style.opacity = '0';
+      } else {
+        htmlLabels[i].style.opacity = '1';
+      }
+    });
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+</script>

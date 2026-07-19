@@ -1,0 +1,60 @@
+[
+  {
+    "content": [
+      { "level": 1, "text": "Bachelor of Science: Mechanical Engineering " },
+      { "level": 2, "text": "Sep 2012 - July 2016" },
+      { "level": 2, "text": "TU Delft, Delft" },
+      { "level": 3, "text": "Bachelor Thesis: The performance of clingfish inspired suction cups on rough surfaces" },
+      { "level": 3, "text": "Learned: Report writing, Teamwork, Creativity " }
+    ]
+  },
+  {
+    "content": [
+      { "level": 1, "text": "Master of Science: Mechanical Engineering – Dynamics and Control" },
+      { "level": 2, "text": "Dynamics, Control, Manufacturing Engineering, Optimization, Kinematics " },
+      { "level": 2, "text": "Sep 2016 - Oct 2020" },
+      { "level": 2, "text": "TU Eindhoven, Eindhoven" },
+      { "level": 3, "text": "Master Thesis: Optimization of a mobile manipulator for consecutive pick and place tasks /nLearned: Critical thinking, researching, Project planning, Independency \nInternship: Rotation control of and overdetermined gantry with a moving payload at Bosch Rexroth \nLearned: Research, Independent work, Formulating results  " }
+    ]
+  },
+  {
+    "content": [
+      { "level": 1, "text": "Intern" },
+      { "level": 2, "text": "Jan 2019 - May 2019" },
+      { "level": 3, "text": "Ut labore et dolore magna aliqua.\nExcepteur sint occaecat cupidatat non proident." }
+    ]
+  },
+  {
+    "content": [
+      { "level": 1, "text": "Junior Developer" },
+      { "level": 2, "text": "Jun 2019 - Feb 2021" },
+      { "level": 3, "text": "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nDuis aute irure dolor." }
+    ]
+  },
+  {
+    "content": [
+      { "level": 1, "text": "Software Engineer" },
+      { "level": 2, "text": "Mar 2021 - Dec 2023" },
+      { "level": 3, "text": "Consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." },
+      { "level": 2, "text": "Key Achievements" },
+      { "level": 3, "text": "- Built scalable systems\n- Mentored junior devs\n- Refactored core modules" }
+    ]
+  },
+  {
+    "content": [
+      { "level": 1, "text": "Senior Developer" },
+      { "level": 2, "text": "Jan 2024 - Present" },
+      { "level": 3, "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nSed do eiusmod tempor incididunt ut labore." }
+    ]
+  },
+  {
+  "content": [
+    { "level": 1, "text": "Software Engineer" },
+    { "level": 2, "text": "Mar 2021 - Dec 2023" },
+    { "level": 3, "text": "General description here.\nIt supports new lines." },
+    { "level": 2, "text": "Key Achievements" },
+    { "level": 2, "text": "Key Achievements" },
+    { "level": 3, "text": "- Built scalable systems\n- Mentored junior devs" }
+  ]
+}
+]

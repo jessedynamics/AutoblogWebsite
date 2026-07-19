@@ -3,167 +3,244 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jesse Beuman</title>
+  <title>Resume - Jesse Beuman</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
-  <style>
-    .sections-wrapper {
-      max-width: var(--max-w);
-      margin: 4rem auto 6rem;
-      padding: 0 2rem;
-    }
-    .sections-intro {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-    .sections-intro h2 {
-      font-family: var(--font-head);
-      font-size: 1rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-    .sections-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-    .section-card {
-      display: flex;
-      flex-direction: column;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-top: 4px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2.5rem 2rem 2rem;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.2s, border-top-color 0.2s, box-shadow 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-    .section-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(230,59,46,0.06) 0%, transparent 65%);
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-    }
-    .section-card:hover {
-      transform: translateY(-5px);
-      border-top-color: var(--accent);
-      box-shadow: 0 12px 40px rgba(230,59,46,0.1);
-    }
-    .section-card:hover::before { opacity: 1; }
-    .section-num {
-      font-family: var(--font-head);
-      font-size: 5rem;
-      line-height: 1;
-      color: var(--bg3);
-      position: absolute;
-      top: 1rem;
-      right: 1.5rem;
-      pointer-events: none;
-      user-select: none;
-    }
-    .section-eyebrow {
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.75rem;
-    }
-    .section-title {
-      font-family: var(--font-head);
-      font-size: 2.8rem;
-      letter-spacing: 0.06em;
-      color: var(--white);
-      line-height: 1;
-      margin-bottom: 1rem;
-      text-transform: uppercase;
-    }
-    .section-desc {
-      font-size: 0.9rem;
-      color: var(--muted);
-      line-height: 1.7;
-      flex: 1;
-      margin-bottom: 1.75rem;
-    }
-    .section-link {
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent);
-      transition: letter-spacing 0.2s;
-    }
-    .section-card:hover .section-link { letter-spacing: 0.22em; }
-
-    @media (max-width: 540px) {
-      .section-title { font-size: 2.2rem; }
-    }
-  </style>
+  
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  
+  <!-- Three.js & GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 </head>
 <body>
 
   <div id="site-header"></div>
 
-  <section class="hero">
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
     <div class="hero-bg"></div>
     <div class="hero-content" style="text-align:center;">
-      <p class="hero-eyebrow">Welkom op mijn website</p>
-      <h1>Jesse<br/>Beuman</h1>
-      <p class="hero-sub">Kies een sectie hieronder.</p>
+      <p class="hero-eyebrow gsap-fade-up">Professional Portfolio</p>
+      <h1 class="gsap-fade-up">Jesse<br/>Beuman</h1>
+      <p class="hero-sub gsap-fade-up">Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing</p>
+      <div class="hero-cta gsap-fade-up" style="justify-content: center;">
+        <a href="#about" class="btn-primary">Learn More</a>
+        <a href="#contact" class="btn-ghost">Contact Me</a>
+      </div>
     </div>
   </section>
 
-  <div class="sections-wrapper">
-    <div class="sections-intro">
-      <h2>Secties</h2>
+  <!-- About Me -->
+  <section class="resume-section" id="about">
+    <h2 class="resume-section-header gsap-fade-up">About Me</h2>
+    <div class="about-grid gsap-fade-up">
+      <div class="about-text">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div>
+      <div class="about-image">
+        JESSE
+      </div>
     </div>
-    <div class="sections-grid">
+  </section>
 
-      <a href="autoblog/" class="section-card">
-        <span class="section-num">01</span>
-        <p class="section-eyebrow">Blog</p>
-        <h2 class="section-title">Autoblog</h2>
-        <p class="section-desc">Autoreviews, nieuws en de wagens van het team — geschreven door autofanaten, voor autofanaten.</p>
-        <span class="section-link">Naar de Autoblog →</span>
-      </a>
-
-      <a href="fotolijstjes/" class="section-card">
-        <span class="section-num">02</span>
-        <p class="section-eyebrow">Album</p>
-        <h2 class="section-title">Fotolijst&shy;jes</h2>
-        <p class="section-desc">Digitaal fotoalbum. Gesorteerd op datum of tag, zodat je altijd snel het goede moment terugvindt.</p>
-        <span class="section-link">Bekijk foto's →</span>
-      </a>
-
-      <a href="info/" class="section-card">
-        <span class="section-num">03</span>
-        <p class="section-eyebrow">Over</p>
-        <h2 class="section-title">Info</h2>
-        <p class="section-desc">Informatie over deze website en wie er achter zit.</p>
-        <span class="section-link">Meer info →</span>
-      </a>
-
-      <a href="vakantie/" class="section-card">
-        <span class="section-num">04</span>
-        <p class="section-eyebrow">Reizen</p>
-        <h2 class="section-title">Vakantie Blog</h2>
-        <p class="section-desc">Verhalen en foto's van vakanties — gesorteerd per bestemming.</p>
-        <span class="section-link">Lees blogs →</span>
-      </a>
-
+  <!-- Experience / Timeline (Vertical HTML/CSS) -->
+  <section class="resume-section" id="experience">
+    <h2 class="resume-section-header gsap-fade-up">Experience & Education</h2>
+    
+    <div class="timeline" id="timeline-container">
+      <!-- Timeline items loaded dynamically from timeline-data.json -->
     </div>
-  </div>
+  </section>
 
-  <div id="site-footer" data-logo="JESSE BEUMAN" data-text="jessebeuman.com"></div>
+  <!-- Skills -->
+  <section class="resume-section" id="skills">
+    <h2 class="resume-section-header gsap-fade-up">Skills</h2>
+    <div class="skills-grid gsap-fade-up">
+      <div class="skill-card">
+        <h4>Skill 1</h4>
+        <p>Lorem ipsum dolor</p>
+      </div>
+      <div class="skill-card">
+        <h4>Skill 2</h4>
+        <p>Consectetur adipiscing</p>
+      </div>
+      <div class="skill-card">
+        <h4>Skill 3</h4>
+        <p>Sed do eiusmod</p>
+      </div>
+      <div class="skill-card">
+        <h4>Skill 4</h4>
+        <p>Tempor incididunt</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section (Password Protected) -->
+  <section class="resume-section" id="contact">
+    <h2 class="resume-section-header gsap-fade-up">Contact</h2>
+    
+    <div class="contact-lock gsap-fade-up" id="contact-lock">
+      <div class="contact-lock-icon">🔒</div>
+      <p>Please enter your email and password to view contact details.</p>
+      <form id="contact-login-form">
+        <input type="email" id="contact-email" placeholder="Email Address" required autocomplete="email" />
+        <input type="password" id="contact-pass" placeholder="Password" required autocomplete="current-password" />
+        <button type="submit" class="btn-primary" id="contact-submit" style="width:100%;">Unlock Details</button>
+        <p id="contact-error" style="color:var(--accent); font-size:0.85rem; margin-top:0.5rem; min-height:1.2em;"></p>
+      </form>
+    </div>
+
+    <div id="contact-details" class="gsap-fade-up">
+      <h3>Contact Information</h3>
+      <ul>
+        <li><span>Email</span> <a href="mailto:jesse@example.com">jesse@example.com</a></li>
+        <li><span>Phone</span> +31 6 1234 5678</li>
+        <li><span>LinkedIn</span> <a href="#">linkedin.com/in/jessebeuman</a></li>
+        <li><span>GitHub</span> <a href="#">github.com/jessebeuman</a></li>
+      </ul>
+      <button class="btn-ghost" id="contact-lock-btn" style="margin-top: 1.5rem;">Lock Details</button>
+    </div>
+
+  </section>
+
+  <div id="site-footer" data-logo="JESSE BEUMAN" data-text="Resume & Portfolio"></div>
+
+<script>
+  // ── Contact Lock Logic (Supabase) ──
+  const { createClient } = window.supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  const contactLock = document.getElementById('contact-lock');
+  const contactDetails = document.getElementById('contact-details');
+  const contactForm = document.getElementById('contact-login-form');
+  const contactErr = document.getElementById('contact-error');
+  const contactBtn = document.getElementById('contact-submit');
+
+  async function checkContactSession() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      contactLock.style.display = 'none';
+      contactDetails.style.display = 'block';
+    }
+  }
+
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    contactBtn.textContent = 'Unlocking...';
+    contactBtn.disabled = true;
+    contactErr.textContent = '';
+
+    const email = document.getElementById('contact-email').value;
+    const pass = document.getElementById('contact-pass').value;
+
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    
+    if (error) {
+      contactErr.textContent = 'Incorrect credentials. Access denied.';
+      contactBtn.textContent = 'Unlock Details';
+      contactBtn.disabled = false;
+    } else {
+      contactLock.style.display = 'none';
+      contactDetails.style.display = 'block';
+      contactBtn.textContent = 'Unlock Details';
+      contactBtn.disabled = false;
+      contactForm.reset();
+    }
+  });
+
+  document.getElementById('contact-lock-btn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    contactDetails.style.display = 'none';
+    contactLock.style.display = 'block';
+  });
+
+  checkContactSession();
+
+  // ── GSAP Animations ──
+  document.addEventListener("DOMContentLoaded", (event) => {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.utils.toArray('.gsap-fade-up').forEach(elem => {
+      gsap.to(elem, {
+        scrollTrigger: {
+          trigger: elem,
+          start: "top 85%",
+        },
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      });
+    });
+  });
+
+  // ── Vertical Timeline Animations & Data Fetching ──
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const response = await fetch('timeline-data.json');
+      const data = await response.json();
+      const container = document.getElementById('timeline-container');
+      
+      data.forEach((item, index) => {
+        // Alternate left and right
+        const sideClass = index % 2 === 0 ? 'left-container' : 'right-container';
+        const arrowClass = index % 2 === 0 ? 'left-container-arrow' : 'right-container-arrow';
+        
+        let contentHTML = '';
+        if (item.content) {
+          contentHTML = item.content.map(block => {
+            const text = block.text ? block.text.replace(/\n/g, '<br/>') : '';
+            return `<div class="tl-level-${block.level}">${text}</div>`;
+          }).join('');
+        }
+        
+        const tlItem = document.createElement('div');
+        tlItem.className = `timeline-container ${sideClass} gsap-tl-item`;
+        
+        tlItem.innerHTML = `
+          <div class="timeline-icon"></div>
+          <div class="text-box">
+            ${contentHTML}
+            <span class="${arrowClass}"></span>
+          </div>
+        `;
+        
+        container.appendChild(tlItem);
+      });
+
+      // After adding elements to DOM, initialize ScrollTrigger animations for them
+      gsap.utils.toArray('.gsap-tl-item').forEach((item) => {
+        let isLeft = item.classList.contains('left-container');
+        gsap.fromTo(item, 
+          { 
+            opacity: 0, 
+            x: isLeft ? -50 : 50 
+          }, 
+          {
+            scrollTrigger: {
+              trigger: item,
+              start: "top 85%",
+            },
+            opacity: 1,
+            x: 0,
+            duration: 0.8,
+            ease: "power2.out"
+          }
+        );
+      });
+      
+      // Tell ScrollTrigger to recalculate since we just changed the DOM
+      ScrollTrigger.refresh();
+      
+    } catch (error) {
+      console.error('Error loading timeline data:', error);
+    }
+  });
+</script>
 
 <script src="layout.js"></script>
 </body>

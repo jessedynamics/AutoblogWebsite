@@ -22,12 +22,12 @@
   ];
 
   /* ── Detect current section from the URL path (e.g. /fotolijstjes/…) ────── */
-  const currentSection = location.pathname.split('/').filter(Boolean)[0] || '';
+  const currentSection = location.pathname.split('/').filter(Boolean).pop() || location.pathname.split('/').filter(Boolean)[0] || '';
 
   /* ── Build header HTML ───────────────────────────────────────────────────── */
   function buildHeader() {
     const links = SECTIONS.map(({ href, label, id }) => {
-      const active = (id === currentSection) ? ' class="active"' : '';
+      const active = location.pathname.includes(id) ? ' class="active"' : '';
       return `<a href="${href}"${active}>${label}</a>`;
     }).join('\n        ');
 

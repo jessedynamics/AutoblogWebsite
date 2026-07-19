@@ -13,8 +13,16 @@
 (function () {
   'use strict';
 
-  /* ── Top-level sections (shown on every page) ───────────────────────────── */
-  const SECTIONS = [
+  /* ── Navigation sections ───────────────────────────── */
+  const RESUME_SECTIONS = [
+    { href: 'index.html#hero',       label: 'Home' },
+    { href: 'index.html#about',      label: 'About' },
+    { href: 'index.html#experience', label: 'Experience' },
+    { href: 'index.html#skills',     label: 'Skills' },
+    { href: 'index.html#contact',    label: 'Contact' },
+  ];
+
+  const HIDDEN_SECTIONS = [
     { href: 'autoblog/',     label: 'Autoblog' },
     { href: 'fotolijstjes/', label: 'Fotolijstjes' },
     { href: 'info/',         label: 'Info' },
@@ -30,15 +38,30 @@
   ];
 
   /* ── Detect current page ─────────────────────────────────────────────────  */
-  const page       = location.pathname.split('/').pop() || 'index.html';
-  const isHomepage = (page === 'index.html' || page === '');
+  const pathname   = location.pathname;
+  const isHiddenItems = pathname.includes('/hiddenitems') || pathname.includes('/autoblog') || pathname.includes('/fotolijstjes') || pathname.includes('/info') || pathname.includes('/vakantie');
+  // Check if we are in a subdirectory so we can prepend '../' to links if necessary
+  const pathDepth = pathname.replace(/^\/+|\/+$/g, '').split('/').length;
+  // This is a naive way to get depth, but we know if pathDepth > 1 we probably need '../'
+  // Actually, we can just look if the script is loaded with a prefix.
+  // Instead, let's just prepend '../' if we are in a subdirectory.
+  const isSubFolder = isHiddenItems && !pathname.endsWith('/hiddenitems') && !pathname.endsWith('/hiddenitems/') && pathname.split('/').filter(Boolean).length > 1;
+  const prefix = isSubFolder ? '../' : '';
+
+  const page       = pathname.split('/').pop() || 'index.html';
+  const isHomepage = (page === 'index.html' || page === '') && !isHiddenItems;
 
   /* ── Build header HTML ───────────────────────────────────────────────────  */
   function buildHeader() {
-    /* Secties links — mark Autoblog active when on any non-homepage root page */
-    const sectionLinks = SECTIONS.map(({ href, label }) => {
-      const isActive = !isHomepage && href === 'autoblog/';
-      return `<a href="${href}"${isActive ? ' class="active"' : ''}>${label}</a>`;
+    const activeNav = isHiddenItems ? HIDDEN_SECTIONS : RESUME_SECTIONS;
+    
+    /* Secties links */
+    const sectionLinks = activeNav.map(({ href, label }) => {
+      // Don't prefix anchor links
+      const finalHref = href.startsWith('index.html#') ? href : prefix + href;
+      const isActive = (!isHomepage && href === 'autoblog/' && pathname.includes('/autoblog')) || 
+                       (pathname.includes(href.replace('/', '')));
+      return `<a href="${finalHref}"${isActive ? ' class="active"' : ''}>${label}</a>`;
     }).join('\n        ');
 
     /* Autoblog sub-nav — only rendered on non-homepage pages */

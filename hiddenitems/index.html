@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Jesse Beuman</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    .sections-wrapper {
+      max-width: var(--max-w);
+      margin: 4rem auto 6rem;
+      padding: 0 2rem;
+    }
+    .sections-intro {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .sections-intro h2 {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .sections-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .section-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem 2rem;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, border-top-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .section-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(230,59,46,0.06) 0%, transparent 65%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .section-card:hover {
+      transform: translateY(-5px);
+      border-top-color: var(--accent);
+      box-shadow: 0 12px 40px rgba(230,59,46,0.1);
+    }
+    .section-card:hover::before { opacity: 1; }
+    .section-num {
+      font-family: var(--font-head);
+      font-size: 5rem;
+      line-height: 1;
+      color: var(--bg3);
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      pointer-events: none;
+      user-select: none;
+    }
+    .section-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: var(--font-head);
+      font-size: 2.8rem;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+    .section-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+      flex: 1;
+      margin-bottom: 1.75rem;
+    }
+    .section-link {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      transition: letter-spacing 0.2s;
+    }
+    .section-card:hover .section-link { letter-spacing: 0.22em; }
+
+    @media (max-width: 540px) {
+      .section-title { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="site-header"></div>
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content" style="text-align:center;">
+      <p class="hero-eyebrow">Welkom op de geheime dashboard</p>
+      <h1>Hidden<br/>Items</h1>
+      <p class="hero-sub">Kies een sectie hieronder.</p>
+    </div>
+  </section>
+
+  <div class="sections-wrapper">
+    <div class="sections-intro">
+      <h2>Secties</h2>
+    </div>
+    <div class="sections-grid">
+
+      <a href="../autoblog/" class="section-card">
+        <span class="section-num">01</span>
+        <p class="section-eyebrow">Blog</p>
+        <h2 class="section-title">Autoblog</h2>
+        <p class="section-desc">Autoreviews, nieuws en de wagens van het team — geschreven door autofanaten, voor autofanaten.</p>
+        <span class="section-link">Naar de Autoblog →</span>
+      </a>
+
+      <a href="../fotolijstjes/" class="section-card">
+        <span class="section-num">02</span>
+        <p class="section-eyebrow">Album</p>
+        <h2 class="section-title">Fotolijst&shy;jes</h2>
+        <p class="section-desc">Digitaal fotoalbum. Gesorteerd op datum of tag, zodat je altijd snel het goede moment terugvindt.</p>
+        <span class="section-link">Bekijk foto's →</span>
+      </a>
+
+      <a href="../info/" class="section-card">
+        <span class="section-num">03</span>
+        <p class="section-eyebrow">Over</p>
+        <h2 class="section-title">Info</h2>
+        <p class="section-desc">Informatie over deze website en wie er achter zit.</p>
+        <span class="section-link">Meer info →</span>
+      </a>
+
+      <a href="../vakantie/" class="section-card">
+        <span class="section-num">04</span>
+        <p class="section-eyebrow">Reizen</p>
+        <h2 class="section-title">Vakantie Blog</h2>
+        <p class="section-desc">Verhalen en foto's van vakanties — gesorteerd per bestemming.</p>
+        <span class="section-link">Lees blogs →</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div id="site-footer" data-logo="JESSE BEUMAN" data-text="jessebeuman.com"></div>
+
+<script src="../layout.js"></script>
+</body>
+</html>
