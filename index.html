@@ -15,6 +15,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- MapLibre GL JS -->
+  <link href="https://unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.js"></script>
 </head>
 <body>
 
@@ -48,12 +52,20 @@
     </div>
   </section>
 
-  <!-- Experience / Timeline (Vertical HTML/CSS) -->
+  <!-- Experience / Timeline (Vertical HTML/CSS + Map) -->
   <section class="resume-section" id="experience">
     <h2 class="resume-section-header gsap-fade-up">Experience & Education</h2>
     
-    <div class="timeline" id="timeline-container">
-      <!-- Timeline items loaded dynamically from timeline-data.json -->
+    <div class="experience-split">
+      <div class="experience-map">
+        <div id="timeline-map"></div>
+        <div class="timeline-map-overlay"></div>
+      </div>
+      <div class="experience-timeline">
+        <div class="timeline" id="timeline-container">
+          <!-- Timeline items loaded dynamically from timeline-data.json -->
+        </div>
+      </div>
     </div>
   </section>
 
@@ -180,41 +192,93 @@
 
   // ── Vertical Timeline Animations & Data Fetching ──
   document.addEventListener("DOMContentLoaded", async () => {
+    // MapLibre Initialization
+    const map = new maplibregl.Map({
+      container: 'timeline-map',
+      style: 'custom-map-style.json',
+      center: [4.895, 52.370], // Default center
+      zoom: 6,
+      attributionControl: false
+    });
+
     try {
       const response = await fetch('timeline-data.json');
       const data = await response.json();
       const container = document.getElementById('timeline-container');
       
+      let isClicking = false;
+      let clickTimeout;
+
       data.forEach((item, index) => {
         // Alternate left and right
         const sideClass = index % 2 === 0 ? 'left-container' : 'right-container';
         const arrowClass = index % 2 === 0 ? 'left-container-arrow' : 'right-container-arrow';
         
-        let contentHTML = '';
+        let headerHTML = '';
+        let bodyHTML = '';
         if (item.content) {
-          contentHTML = item.content.map(block => {
+          item.content.forEach(block => {
             const text = block.text ? block.text.replace(/\n/g, '<br/>') : '';
-            return `<div class="tl-level-${block.level}">${text}</div>`;
-          }).join('');
+            if (block.level === 1) {
+              headerHTML += `<div class="tl-level-${block.level}">${text}</div>`;
+            } else {
+              bodyHTML += `<div class="tl-level-${block.level}">${text}</div>`;
+            }
+          });
         }
         
         const tlItem = document.createElement('div');
         tlItem.className = `timeline-container ${sideClass} gsap-tl-item`;
         
+        if (item.location) {
+          tlItem.dataset.lng = item.location.lng;
+          tlItem.dataset.lat = item.location.lat;
+          tlItem.dataset.zoom = item.location.zoom || 12;
+          
+          const pinEl = document.createElement('div');
+          pinEl.className = 'map-timeline-pin';
+          pinEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            tlItem.click();
+          });
+          
+          new maplibregl.Marker({ element: pinEl, anchor: 'center' })
+            .setLngLat([item.location.lng, item.location.lat])
+            .addTo(map);
+        }
+        
         tlItem.innerHTML = `
           <div class="timeline-icon"></div>
           <div class="text-box">
-            ${contentHTML}
+            <div class="tl-header">${headerHTML}</div>
+            <div class="tl-body">${bodyHTML}</div>
             <span class="${arrowClass}"></span>
           </div>
         `;
+        
+        tlItem.addEventListener('click', () => {
+          isClicking = true;
+          clearTimeout(clickTimeout);
+          
+          activateItem(tlItem, false);
+          tlItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Disable scroll triggers until smooth scroll finishes
+          clickTimeout = setTimeout(() => {
+            isClicking = false;
+            ScrollTrigger.refresh();
+          }, 1200);
+        });
         
         container.appendChild(tlItem);
       });
 
       // After adding elements to DOM, initialize ScrollTrigger animations for them
-      gsap.utils.toArray('.gsap-tl-item').forEach((item) => {
+      const items = gsap.utils.toArray('.gsap-tl-item');
+      items.forEach((item) => {
         let isLeft = item.classList.contains('left-container');
+        
+        // 1. Entrance animation (fade in)
         gsap.fromTo(item, 
           { 
             opacity: 0, 
@@ -231,13 +295,65 @@
             ease: "power2.out"
           }
         );
+
+        // 2. Active selection (uncollapse and fly map)
+        ScrollTrigger.create({
+          trigger: item,
+          start: "top 50%",
+          end: "bottom 30%",
+          onEnter: () => activateItem(item, true),
+          onEnterBack: () => activateItem(item, true)
+        });
       });
       
       // Tell ScrollTrigger to recalculate since we just changed the DOM
       ScrollTrigger.refresh();
       
+      function activateItem(activeItem, fromScroll = true) {
+        if (fromScroll && isClicking) return;
+        
+        // Expand active item
+        gsap.to(activeItem.querySelector('.tl-body'), { 
+          height: "auto", 
+          opacity: 1, 
+          duration: 0.5, 
+          ease: "power2.out",
+          onComplete: () => ScrollTrigger.refresh()
+        });
+        
+        // Highlight active styling (optional)
+        activeItem.classList.add('is-active');
+        
+        // Collapse others
+        items.forEach(item => {
+          if (item !== activeItem) {
+            gsap.to(item.querySelector('.tl-body'), { 
+              height: 0, 
+              opacity: 0, 
+              duration: 0.4, 
+              ease: "power2.out"
+            });
+            item.classList.remove('is-active');
+          }
+        });
+        
+        // Fly map
+        flyToLocation(activeItem);
+      }
+
     } catch (error) {
       console.error('Error loading timeline data:', error);
+    }
+
+    function flyToLocation(element) {
+      if (element.dataset.lng && element.dataset.lat) {
+        map.flyTo({
+          center: [parseFloat(element.dataset.lng), parseFloat(element.dataset.lat)],
+          zoom: parseFloat(element.dataset.zoom) || 12,
+          duration: 2000,
+          essential: true
+        });
+      }
     }
   });
 </script>
