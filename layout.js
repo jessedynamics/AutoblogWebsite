@@ -18,7 +18,8 @@
     { href: 'index.html#hero',       label: 'Home' },
     { href: 'index.html#about',      label: 'About' },
     { href: 'index.html#experience', label: 'Experience' },
-    { href: 'index.html#skills',     label: 'Skills' },
+    { href: 'index.html#Personalskills',     label: 'Personal skills' },
+    { href: 'index.html#Technicalskills',     label: 'Technical skills' },
     { href: 'index.html#contact',    label: 'Contact' },
   ];
 

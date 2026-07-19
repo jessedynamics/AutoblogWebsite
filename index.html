@@ -28,9 +28,9 @@
   <section class="hero" id="hero">
     <div class="hero-bg"></div>
     <div class="hero-content" style="text-align:center;">
-      <p class="hero-eyebrow gsap-fade-up">Professional Portfolio</p>
+      <p class="hero-eyebrow gsap-fade-up">Get to know:</p>
       <h1 class="gsap-fade-up">Jesse<br/>Beuman</h1>
-      <p class="hero-sub gsap-fade-up">Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing</p>
+      <p class="hero-sub gsap-fade-up">All-round automation enthusiast seeking complex challenges to solve</p>
       <div class="hero-cta gsap-fade-up" style="justify-content: center;">
         <a href="#about" class="btn-primary">Learn More</a>
         <a href="#contact" class="btn-ghost">Contact Me</a>
@@ -43,8 +43,9 @@
     <h2 class="resume-section-header gsap-fade-up">About Me</h2>
     <div class="about-grid gsap-fade-up">
       <div class="about-text">
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<p>R&D Vision Engineer with an educational background in Mechanical Engineering who transitioned to software development in my professional career. Passionate about prototyping, R&D, machine vision and automation, driven by a "How can we do this better?" mentality.</p>
+<p>In my current role at Sormac, I specialize in the automation of our vegetable processing machines using machine vision and custom algorithm development.</p>
+<p>I'm looking forward to applying my knowledge of machine vision and algorithm development to future challenges and extending my proficiency in multiple programming languages, and exploring diverse software development disciplines beyond industrial automation.</p>
       </div>
       <div class="about-image">
         JESSE
@@ -70,25 +71,69 @@
   </section>
 
   <!-- Skills -->
-  <section class="resume-section" id="skills">
-    <h2 class="resume-section-header gsap-fade-up">Skills</h2>
+  <section class="resume-section" id="Personalskills">
+    <h2 class="resume-section-header gsap-fade-up">Personal skills</h2>
     <div class="skills-grid gsap-fade-up">
       <div class="skill-card">
-        <h4>Skill 1</h4>
-        <p>Lorem ipsum dolor</p>
+        <h4>Fast learner</h4>
       </div>
       <div class="skill-card">
-        <h4>Skill 2</h4>
-        <p>Consectetur adipiscing</p>
+        <h4>Result driven</h4>
       </div>
       <div class="skill-card">
-        <h4>Skill 3</h4>
-        <p>Sed do eiusmod</p>
+        <h4>Critical thinking</h4>
       </div>
       <div class="skill-card">
-        <h4>Skill 4</h4>
-        <p>Tempor incididunt</p>
+        <h4>Adaptive</h4>
       </div>
+      <div class="skill-card">
+        <h4>Independent</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Multidisciplinary teamwork</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Communicative</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Honest and reliable</h4>
+      </div>
+      
+    </div>
+  </section>
+
+    <!-- Skills -->
+  <section class="resume-section" id="Technicalskills">
+    <h2 class="resume-section-header gsap-fade-up">Technical skills</h2>
+    <div class="skills-grid gsap-fade-up">
+      <div class="skill-card">
+        <h4>Python</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Halcon</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Deep learning</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Optics</h4>
+      </div>
+      <div class="skill-card">
+        <h4>c#</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Robotics</h4>
+      </div>
+      <div class="skill-card">
+        <h4>CAD</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Javascript</h4>
+      </div>
+      <div class="skill-card">
+        <h4>Matlab</h4>
+      </div>
+
     </div>
   </section>
 
@@ -328,24 +373,7 @@
       const items = gsap.utils.toArray('.gsap-tl-item');
       items.forEach((item) => {
         let isLeft = item.classList.contains('left-container');
-        
-        // 1. Entrance animation (fade in)
-        gsap.fromTo(item, 
-          { 
-            opacity: 0, 
-            x: isLeft ? -50 : 50 
-          }, 
-          {
-            scrollTrigger: {
-              trigger: item,
-              start: "top 85%",
-            },
-            opacity: 1,
-            x: 0,
-            duration: 0.8,
-            ease: "power2.out"
-          }
-        );
+
 
         // 2. Active selection (uncollapse and fly map)
         ScrollTrigger.create({

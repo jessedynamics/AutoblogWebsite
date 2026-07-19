@@ -748,7 +748,7 @@ header, .subnav-bar {
 }
 
 .about-text p {
-  color: var(--muted);
+  color:  #f3dfdf;
   line-height: 1.8;
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
@@ -849,7 +849,7 @@ header, .subnav-bar {
   position: relative;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem 0;
+  padding: 2rem 0 50vh 0;
 }
 
 .timeline::after {
