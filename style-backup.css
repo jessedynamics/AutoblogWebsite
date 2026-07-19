@@ -1065,43 +1065,5 @@ header, .subnav-bar {
   }
 }
 
-/* ── Parallax Depth Effects ── */
-#parallax-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 0; /* Above Vanta (-1), below content (1+) */
-  pointer-events: none;
-  overflow: hidden;
-}
 
-.parallax-layer {
-  position: absolute;
-  top: -15%;
-  left: -15%;
-  width: 130%;
-  height: 130%;
-  background-size: cover;
-  background-position: center;
-  pointer-events: none;
-}
 
-.parallax-layer-back {
-  background: radial-gradient(circle at 80% 20%, rgba(230,59,46,0.12) 0%, transparent 45%);
-}
-
-.parallax-layer-mid {
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 80px 80px;
-  transform: perspective(600px) rotateX(45deg);
-  transform-origin: center top;
-  opacity: 0.8;
-}
-
-.parallax-layer-front {
-  background: radial-gradient(circle at 10% 80%, rgba(245,166,35,0.08) 0%, transparent 35%);
-}

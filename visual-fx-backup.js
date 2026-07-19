@@ -6,15 +6,6 @@
   vantaBg.id = 'vanta-bg';
   document.body.appendChild(vantaBg);
 
-  const parallaxContainer = document.createElement('div');
-  parallaxContainer.id = 'parallax-container';
-  parallaxContainer.innerHTML = `
-    <div class="parallax-layer parallax-layer-back"></div>
-    <div class="parallax-layer parallax-layer-mid"></div>
-    <div class="parallax-layer parallax-layer-front"></div>
-  `;
-  document.body.appendChild(parallaxContainer);
-
   const transitionOverlay = document.createElement('div');
   transitionOverlay.id = 'page-transition-overlay';
   Object.assign(transitionOverlay.style, {
@@ -93,38 +84,6 @@
           }
         }
       );
-    });
-
-    // Parallax Depth Animations
-    gsap.to('.parallax-layer-back', {
-      yPercent: 15,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: document.body,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true
-      }
-    });
-    gsap.to('.parallax-layer-mid', {
-      yPercent: 5,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: document.body,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true
-      }
-    });
-    gsap.to('.parallax-layer-front', {
-      yPercent: -15,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: document.body,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true
-      }
     });
 
     // Hero animations
