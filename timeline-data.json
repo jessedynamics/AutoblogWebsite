@@ -1,64 +1,196 @@
 [
   {
-    "location": { "lng": 4.373, "lat": 52.001, "zoom": 13 },
+    "location": {
+      "lng": 4.373,
+      "lat": 52.001,
+      "zoom": 13
+    },
     "content": [
-      { "level": 1, "text": "Bachelor of Science: Mechanical Engineering " },
-      { "level": 2, "text": "Sep 2012 - July 2016" },
-      { "level": 2, "text": "TU Delft, Delft" },
-      { "level": 3, "text": "Bachelor Thesis: The performance of clingfish inspired suction cups on rough surfaces" },
-      { "level": 2, "text": "Learned:" },
-      { "level": 3, "text": "Report writing, Teamwork, Creativity " }
-    ]
-  },  
-  {
-    "location": { "lng": 4.373, "lat": 52.001, "zoom": 13 },
-    "content": [
-      { "level": 1, "text": "Collegerama operator" },
-      { "level": 2, "text": "Oct 2013 - July 2016" },
-      { "level": 2, "text": "TU Delft, Delft" },
-      { "level": 3, "text": "Recording the lectures of a large variety of Bachelor and Master courses, as well as assisting the lecturers ands upervising the lecture rooms. " },
-      { "level": 3, "text": "Provides broad insight in multiple disciplines. " }
-    ]
-  },
-  {
-    "location": { "lng": 5.485, "lat": 51.448, "zoom": 13 },
-    "content": [
-      { "level": 1, "text": "Master of Science: Mechanical Engineering – Dynamics and Control" },
-      { "level": 2, "text": "Dynamics, Control, Manufacturing Engineering, Optimization, Kinematics " },
-      { "level": 2, "text": "Sep 2016 - Oct 2020" },
-      { "level": 2, "text": "TU Eindhoven, Eindhoven" },
-      { "level": 3, "text": "Master Thesis: Optimization of a mobile manipulator for consecutive pick and place tasks \nLearned: Critical thinking, researching, Project planning, Independency" },
-      { "level": 3, "text": " \nInternship: Rotation control of and overdetermined gantry with a moving payload at Bosch Rexroth \nLearned: Research, Independent work, Formulating results  " },
-      { "level": 2, "text": "Learned:" },
-      { "level": 3, "text": " Research, Independent work, Formulating results" }
-    ]
-  },
-  {
-    "location": { "lng": 5.446762, "lat": 51.434315, "zoom": 13 },
-    "content": [
-      { "level": 1, "text": "Prototype/Vision Engineer " },
-      { "level": 2, "text": "Oct 2020 - April 2024" },
-      { "level": 3, "text": "Customer specific Vision and Robotics solutions." },
-      { "level": 3, "text": "Defect detection, size determination, object localization, robot path planning, kinematics, adaptive robot pick and placing, advanced algorithms." },
-      { "level": 2, "text": "Learned:" },
-      { "level": 3, "text": "Python, Javascript, Linux, Teamwork with multiple disciplines, Project planning, Robot integration " }
+      {
+        "level": 1,
+        "text": "Bachelor of Science: Mechanical Engineering "
+      },
+      {
+        "level": 2,
+        "text": "Sep 2012 - July 2016"
+      },
+      {
+        "level": 2,
+        "text": "TU Delft, Delft"
+      },
+      {
+        "level": 3,
+        "text": "Bachelor Thesis: The performance of clingfish inspired suction cups on rough surfaces"
+      },
+      {
+        "level": 2,
+        "text": "Learned:"
+      },
+      {
+        "level": 3,
+        "text": "Report writing, Teamwork, Creativity "
+      }
     ]
   },
   {
-    "location": { "lng": 6.185906, "lat": 51.391651, "zoom": 12 },
+    "location": {
+      "lng": 4.373,
+      "lat": 52.001,
+      "zoom": 13
+    },
     "content": [
-      { "level": 1, "text": "R&D Vision Engineer" },
-      { "level": 2, "text": "April 2024 - Present" },
-      { "level": 3, "text": "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nDuis aute irure dolor." }
+      {
+        "level": 1,
+        "text": "Collegerama operator"
+      },
+      {
+        "level": 2,
+        "text": "Oct 2013 - July 2016"
+      },
+      {
+        "level": 2,
+        "text": "TU Delft, Delft"
+      },
+      {
+        "level": 3,
+        "text": "Recording the lectures of a large variety of Bachelor and Master courses, as well as assisting the lecturers ands upervising the lecture rooms. "
+      },
+      {
+        "level": 3,
+        "text": "Provides broad insight in multiple disciplines. "
+      }
     ]
   },
   {
-    "location": { "lng": 5.745876, "lat": 51.404094, "zoom": 9 },
+    "location": {
+      "lng": 5.485,
+      "lat": 51.448,
+      "zoom": 13
+    },
     "content": [
-      { "level": 1, "text": "R&D Vision/Software Engineer?" },
-      { "level": 2, "text": "? - ?" },
-      { "level": 2, "text": "Key Achievements" },
-      { "level": 3, "text": "- Built scalable systems\n- Mentored junior devs\n- Refactored core modules" }
+      {
+        "level": 1,
+        "text": "Master of Science: Mechanical Engineering – Dynamics and Control"
+      },
+      {
+        "level": 2,
+        "text": "Dynamics, Control, Manufacturing Engineering, Optimization, Kinematics "
+      },
+      {
+        "level": 2,
+        "text": "Sep 2016 - Oct 2020"
+      },
+      {
+        "level": 2,
+        "text": "TU Eindhoven, Eindhoven"
+      },
+      {
+        "level": 3,
+        "text": "Master Thesis: Optimization of a mobile manipulator for consecutive pick and place tasks \nLearned: Critical thinking, researching, Project planning, Independency"
+      },
+      {
+        "level": 3,
+        "text": " \nInternship: Rotation control of and overdetermined gantry with a moving payload at Bosch Rexroth \nLearned: Research, Independent work, Formulating results  "
+      },
+      {
+        "level": 2,
+        "text": "Learned:"
+      },
+      {
+        "level": 3,
+        "text": " Research, Independent work, Formulating results"
+      }
+    ]
+  },
+  {
+    "location": {
+      "lng": 5.446762,
+      "lat": 51.434315,
+      "zoom": 13
+    },
+    "content": [
+      {
+        "level": 1,
+        "text": "Prototype/Vision Engineer "
+      },
+      {
+        "level": 2,
+        "text": "Oct 2020 - April 2024"
+      },
+      {
+        "level": 3,
+        "text": "Customer specific Vision and Robotics solutions."
+      },
+      {
+        "level": 3,
+        "text": "Defect detection, size determination, object localization, robot path planning, kinematics, adaptive robot pick and placing, advanced algorithms."
+      },
+      {
+        "level": 2,
+        "text": "Learned:"
+      },
+      {
+        "level": 3,
+        "text": "Python, Javascript, Linux, Teamwork with multiple disciplines, Project planning, Robot integration "
+      }
+    ]
+  },
+  {
+    "location": {
+      "lng": 6.185906,
+      "lat": 51.391651,
+      "zoom": 12
+    },
+    "content": [
+      {
+        "level": 1,
+        "text": "R&D Vision Engineer"
+      },
+      {
+        "level": 2,
+        "text": "April 2024 - Present"
+      },
+      {
+        "level": 2,
+        "text": "Achievements"
+      },
+      {
+        "level": 3,
+        "text": "Fully automatic processing of bell peppers from bulk to end product. Machine: PCR. \nPractical application of Deep Learning Models for vegetable recognition for both classification and orientation.\nAutomation of repetitive daily tasks for reduction of effort and gaining insight in data."
+      },
+            {
+        "level": 2,
+        "text": "Learned:"
+      },
+            {
+        "level": 3,
+        "text": "MVTec Halcon, Applying Deep Learning models, using AI effectivly in daily tasks"
+      }
+    ]
+  },
+  {
+    "location": {
+      "lng": 5.745876,
+      "lat": 51.404094,
+      "zoom": 9}
+      ,
+    "content": [
+      {
+        "level": 1,
+        "text": "R&D Vision/Software Engineer?"
+      },
+      {
+        "level": 2,
+        "text": "? - ?"
+      },
+      {
+        "level": 2,
+        "text": "Key Achievements"
+      },
+      {
+        "level": 3,
+        "text": "- Built scalable systems\n- Mentored junior devs\n- Refactored core modules"
+      }
     ]
   }
 ]
